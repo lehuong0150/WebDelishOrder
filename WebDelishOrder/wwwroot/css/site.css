@@ -1,0 +1,60 @@
+html {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  margin-bottom: 60px;
+}
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh; /* Chi?u cao toàn màn hình */
+    background-color: #f8f9fa; /* Màu n?n nh? */
+}
+
+.login-box {
+    width: 100%;
+    max-width: 400px; /* ?? r?ng t?i ?a */
+    padding: 20px;
+    background-color: white; /* Màu n?n c?a form */
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1); /* Hi?u ?ng bóng */
+    border-radius: 8px; /* Bo góc */
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+}
+
+.btn-block {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+}
+
+h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+

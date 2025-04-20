@@ -1,0 +1,122 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\assets\css\animate.css\css\animate.css" />
+    <None Include="wwwroot\assets\css\bootstrap\css\bootstrap.min.css" />
+    <None Include="wwwroot\assets\css\jquery.mCustomScrollbar.css" />
+    <None Include="wwwroot\assets\css\morris.js\css\morris.css" />
+    <None Include="wwwroot\assets\css\style.css" />
+    <None Include="wwwroot\assets\icon\icofont\css\icofont.css" />
+    <None Include="wwwroot\assets\icon\icofont\fonts\icofont.eot" />
+    <None Include="wwwroot\assets\icon\icofont\fonts\icofont.svg" />
+    <None Include="wwwroot\assets\icon\icofont\fonts\icofont.ttf" />
+    <None Include="wwwroot\assets\icon\icofont\fonts\icofont.woff" />
+    <None Include="wwwroot\assets\icon\themify-icons\fonts\themify.eot" />
+    <None Include="wwwroot\assets\icon\themify-icons\fonts\themify.svg" />
+    <None Include="wwwroot\assets\icon\themify-icons\fonts\themify.ttf" />
+    <None Include="wwwroot\assets\icon\themify-icons\fonts\themify.woff" />
+    <None Include="wwwroot\assets\icon\themify-icons\themify-icons.css" />
+    <None Include="wwwroot\assets\images\auth\logo-dark.png" />
+    <None Include="wwwroot\assets\images\auth\Logo-small-bottom.png" />
+    <None Include="wwwroot\assets\images\auth\logo.png" />
+    <None Include="wwwroot\assets\images\avatar-1.jpg" />
+    <None Include="wwwroot\assets\images\avatar-2.jpg" />
+    <None Include="wwwroot\assets\images\avatar-3.jpg" />
+    <None Include="wwwroot\assets\images\avatar-4.jpg" />
+    <None Include="wwwroot\assets\images\bg.jpg" />
+    <None Include="wwwroot\assets\images\favicon.ico" />
+    <None Include="wwwroot\assets\images\flags\ENGLISH.jpg" />
+    <None Include="wwwroot\assets\images\flags\FRANCE.jpg" />
+    <None Include="wwwroot\assets\images\flags\PORTO.jpg" />
+    <None Include="wwwroot\assets\images\flags\SPAIN.jpg" />
+    <None Include="wwwroot\assets\images\logo.png" />
+    <None Include="wwwroot\assets\images\mega-menu\01.jpg" />
+    <None Include="wwwroot\assets\images\mega-menu\02.jpg" />
+    <None Include="wwwroot\assets\images\mega-menu\03.jpg" />
+    <None Include="wwwroot\assets\images\mega-menu\04.jpg" />
+    <None Include="wwwroot\assets\images\mega-menu\05.jpg" />
+    <None Include="wwwroot\assets\images\mega-menu\06.jpg" />
+    <None Include="wwwroot\assets\images\pattern2.jpg" />
+    <None Include="wwwroot\assets\images\user.png" />
+    <None Include="wwwroot\assets\js\bootstrap-growl.min.js" />
+    <None Include="wwwroot\assets\js\bootstrap\js\bootstrap.min.js" />
+    <None Include="wwwroot\assets\js\classie.js" />
+    <None Include="wwwroot\assets\js\classie\classie.js" />
+    <None Include="wwwroot\assets\js\common-pages.js" />
+    <None Include="wwwroot\assets\js\demo-12.js" />
+    <None Include="wwwroot\assets\js\jquery-slimscroll\jquery.slimscroll.js" />
+    <None Include="wwwroot\assets\js\jquery-ui\jquery-ui.min.js" />
+    <None Include="wwwroot\assets\js\jquery.mCustomScrollbar.concat.min.js" />
+    <None Include="wwwroot\assets\js\jquery.mousewheel.min.js" />
+    <None Include="wwwroot\assets\js\jquery\jquery.min.js" />
+    <None Include="wwwroot\assets\js\modernizr\css-scrollbars.js" />
+    <None Include="wwwroot\assets\js\modernizr\modernizr.js" />
+    <None Include="wwwroot\assets\js\morris.js\morris.js" />
+    <None Include="wwwroot\assets\js\pcoded.min.js" />
+    <None Include="wwwroot\assets\js\popper.js\popper.min.js" />
+    <None Include="wwwroot\assets\js\raphael\raphael.min.js" />
+    <None Include="wwwroot\assets\js\script.js" />
+    <None Include="wwwroot\assets\js\script.min.js" />
+    <None Include="wwwroot\assets\js\SmoothScroll.js" />
+    <None Include="wwwroot\assets\pages\accordion\accordion.js" />
+    <None Include="wwwroot\assets\pages\accordion\accordion.min.js" />
+    <None Include="wwwroot\assets\pages\chart\morris\morris-custom-chart.js" />
+    <None Include="wwwroot\assets\pages\dashboard\amchart\css\amchart.css" />
+    <None Include="wwwroot\assets\pages\dashboard\amchart\css\export.css" />
+    <None Include="wwwroot\assets\pages\dashboard\amchart\js\amcharts.js" />
+    <None Include="wwwroot\assets\pages\dashboard\amchart\js\custom-amchart.js" />
+    <None Include="wwwroot\assets\pages\dashboard\amchart\js\export.min.js" />
+    <None Include="wwwroot\assets\pages\dashboard\amchart\js\images\dragIconRoundBig.svg" />
+    <None Include="wwwroot\assets\pages\dashboard\amchart\js\images\dragIconRoundBigH.svg" />
+    <None Include="wwwroot\assets\pages\dashboard\amchart\js\light.js" />
+    <None Include="wwwroot\assets\pages\dashboard\amchart\js\serial.js" />
+    <None Include="wwwroot\assets\pages\dashboard\custom-dashboard.js" />
+    <None Include="wwwroot\assets\pages\google-maps\gmaps.min.js" />
+    <None Include="wwwroot\assets\pages\google-maps\jquery.gmaps.js" />
+    <None Include="wwwroot\assets\pages\icon-modal.js" />
+    <None Include="wwwroot\assets\pages\notification\notification.css" />
+    <None Include="wwwroot\assets\pages\notification\notification.js" />
+    <None Include="wwwroot\assets\pages\todo\todo.js" />
+    <None Include="wwwroot\assets\pages\widget\amchart\amcharts.js" />
+    <None Include="wwwroot\assets\pages\widget\amchart\amcharts.min.js" />
+    <None Include="wwwroot\assets\pages\widget\amchart\ammap.js" />
+    <None Include="wwwroot\assets\pages\widget\amchart\ammap.min.js" />
+    <None Include="wwwroot\assets\pages\widget\amchart\continentsLow.js" />
+    <None Include="wwwroot\assets\pages\widget\amchart\continentsLow.min.js" />
+    <None Include="wwwroot\assets\pages\widget\amchart\gauge.js" />
+    <None Include="wwwroot\assets\pages\widget\amchart\gauge.min.js" />
+    <None Include="wwwroot\assets\pages\widget\amchart\light.js" />
+    <None Include="wwwroot\assets\pages\widget\amchart\light.min.js" />
+    <None Include="wwwroot\assets\pages\widget\amchart\pie.js" />
+    <None Include="wwwroot\assets\pages\widget\amchart\pie.min.js" />
+    <None Include="wwwroot\assets\pages\widget\amchart\serial.js" />
+    <None Include="wwwroot\assets\pages\widget\amchart\serial.min.js" />
+    <None Include="wwwroot\assets\pages\widget\amchart\worldLow.js" />
+    <None Include="wwwroot\assets\pages\widget\amchart\worldLow.min.js" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ClosedXML" Version="0.104.2" />
+    <PackageReference Include="EPPlus" Version="8.0.2" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.3" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.3">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.7" />
+    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="8.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Repository\" />
+    <Folder Include="wwwroot\assets\sound\" />
+  </ItemGroup>
+
+</Project>

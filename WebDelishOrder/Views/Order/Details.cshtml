@@ -1,0 +1,414 @@
+﻿@model WebDelishOrder.ViewModels.OrderDetailViewModel
+
+@{
+    ViewData["ActivePage"] = "UpdateStatus";
+    ViewData["PageTitle"] = "Chi tiết đơn hàng";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="pcoded-main-container">
+    <div class="main-body">
+        <div class="page-wrapper">
+            <div class="page-body">
+                <div class="row">
+                    <!-- Thông tin đơn hàng và Khách hàng -->
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0">
+                                    <i class="icofont icofont-food-cart mr-2"></i>Thông tin đơn hàng #@Model.Order.Id
+                                </h5>
+                            </div>
+                            <div class="card-block">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6 class="f-w-600 m-b-10">Thời gian đặt:</h6>
+                                        <p class="text-muted">@Model.Order.RegTime?.ToString("dd/MM/yyyy HH:mm:ss")</p>
+
+                                        <h6 class="f-w-600 m-b-10">Trạng thái đơn hàng:</h6>
+                                        @{
+                                            string statusClass = "";
+                                            string statusText = "";
+
+                                            switch (Model.Order.Status)
+                                            {
+                                                case 0:
+                                                    statusClass = "bg-warning";
+                                                    statusText = "Chờ xác nhận";
+                                                    break;
+                                                case 1:
+                                                    statusClass = "bg-info";
+                                                    statusText = "Đang chuẩn bị";
+                                                    break;
+                                                case 2:
+                                                    statusClass = "bg-primary";
+                                                    statusText = "Đang giao hàng";
+                                                    break;
+                                                case 3:
+                                                    statusClass = "bg-success";
+                                                    statusText = "Đã giao hàng";
+                                                    break;
+                                                case 4:
+                                                    statusClass = "bg-danger";
+                                                    statusText = "Đã hủy";
+                                                    break;
+                                            }
+                                        }
+                                        <span class="badge @statusClass p-2">@statusText</span>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6 class="f-w-600 m-b-10">Phương thức thanh toán:</h6>
+                                        <p class="text-muted">@(Model.Order.PaymentMethod == "Cash" ? "Tiền mặt" : Model.Order.PaymentMethod)</p>
+
+                                        <h6 class="f-w-600 m-b-10">Trạng thái thanh toán:</h6>
+                                        <span class="badge @(Model.Order.PaymentStatus == "pending" ? "bg-warning" : "bg-success") p-2">
+                                            @(Model.Order.PaymentStatus == "pending" ? "Chưa thanh toán" : "Đã thanh toán")
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Thông tin khách hàng -->
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header bg-info text-white">
+                                <h5 class="mb-0">
+                                    <i class="icofont icofont-user-alt-3 mr-2"></i>Thông tin khách hàng
+                                </h5>
+                            </div>
+                            <div class="card-block">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6 class="f-w-600 m-b-10">Tài khoản:</h6>
+                                        <p class="text-muted">@Model.Order.AccountEmail</p>
+
+                                        <h6 class="f-w-600 m-b-10">Khách hàng:</h6>
+                                        <p class="text-muted">@(Model.Customer?.Name ?? "Không xác định")</p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6 class="f-w-600 m-b-10">Số điện thoại:</h6>
+                                        <p class="text-muted">@Model.Order.Phone</p>
+
+                                        <h6 class="f-w-600 m-b-10">Địa chỉ giao hàng:</h6>
+                                        <p class="text-muted">@Model.Order.ShippingAddress</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Danh sách sản phẩm -->
+                <div class="row mt-3">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-header bg-success text-white">
+                                <h5 class="mb-0">
+                                    <i class="icofont icofont-culinary mr-2"></i>Danh sách món ăn
+                                </h5>
+                            </div>
+                            <div class="card-block table-border-style">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th width="10%">Hình ảnh</th>
+                                                <th width="40%">Tên món</th>
+                                                <th width="15%" class="text-center">Đơn giá</th>
+                                                <th width="15%" class="text-center">Số lượng</th>
+                                                <th width="20%" class="text-end">Thành tiền</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var item in Model.Order.OrderDetails)
+                                            {
+                                                <tr>
+                                                    <td>
+                                                        <img src="@item.Product.ImageProduct" alt="@item.Product.Name"
+                                                             class="img-fluid rounded" style="max-height: 50px;">
+                                                    </td>
+                                                    <td>
+                                                        <div class="d-flex flex-column">
+                                                            <h6 class="mb-1">@item.Product.Name</h6>
+                                                            <small class="text-muted">@item.Product.Category?.Name</small>
+                                                        </div>
+                                                    </td>
+                                                    <td class="text-center">@item.Product.Price.Value.ToString("N0") đ</td>
+                                                    <td class="text-center">@item.Quantity</td>
+                                                    <td class="text-end fw-bold">@((item.Product.Price * item.Quantity).Value.ToString("N0")) đ</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                        <tfoot>
+                                            <tr class="bg-light">
+                                                <td colspan="4" class="text-end fw-bold">Tổng cộng:</td>
+                                                <td class="text-end fw-bold fs-5 text-primary">@Model.Order.TotalPrice?.ToString("N0") đ</td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cập nhật trạng thái và Lịch sử -->
+                <div class="row mt-3">
+                    <!-- Form cập nhật trạng thái -->
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header bg-warning text-white">
+                                <h5 class="mb-0">
+                                    <i class="icofont icofont-refresh mr-2"></i>Cập nhật trạng thái
+                                </h5>
+                            </div>
+                            <div class="card-block">
+                                <form method="post" asp-action="UpdateOrder" asp-controller="Order">
+                                    <input type="hidden" name="Id" value="@Model.Order.Id" />
+
+                                    <div class="form-group row mb-3">
+                                        <label class="col-sm-4 col-form-label">Trạng thái đơn hàng:</label>
+                                        <div class="col-sm-8">
+                                            <select class="form-select" name="Status">
+                                                @if (Model.Order.Status == 0)
+                                                {
+                                                    <option value="0" selected>Chờ xác nhận</option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="0">Chờ xác nhận</option>
+                                                }
+
+                                                @if (Model.Order.Status == 1)
+                                                {
+                                                    <option value="1" selected>Đang chuẩn bị</option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="1">Đang chuẩn bị</option>
+                                                }
+
+                                                @if (Model.Order.Status == 2)
+                                                {
+                                                    <option value="2" selected>Đang giao hàng</option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="2">Đang giao hàng</option>
+                                                }
+
+                                                @if (Model.Order.Status == 3)
+                                                {
+                                                    <option value="3" selected>Đã giao hàng</option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="3">Đã giao hàng</option>
+                                                }
+
+                                                @if (Model.Order.Status == 4)
+                                                {
+                                                    <option value="4" selected>Đã hủy</option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="4">Đã hủy</option>
+                                                }
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row mb-3">
+                                        <label class="col-sm-4 col-form-label">Địa chỉ giao hàng:</label>
+                                        <div class="col-sm-8">
+                                            <input type="text" class="form-control" name="ShippingAddress" value="@Model.Order.ShippingAddress" />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row mb-3">
+                                        <label class="col-sm-4 col-form-label">Số điện thoại:</label>
+                                        <div class="col-sm-8">
+                                            <input type="text" class="form-control" name="Phone" value="@Model.Order.Phone" />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row mb-3">
+                                        <label class="col-sm-4 col-form-label">Phương thức thanh toán:</label>
+                                        <div class="col-sm-8">
+                                            <input type="text" class="form-control" name="PaymentMethod" value="@Model.Order.PaymentMethod" />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row mb-3">
+                                        <label class="col-sm-4 col-form-label">Trạng thái thanh toán:</label>
+                                        <div class="col-sm-8">
+                                            <select class="form-select" name="PaymentStatus">
+                                                @if (Model.Order.PaymentStatus == "pending")
+                                                {
+                                                    <option value="pending" selected>Chưa thanh toán</option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="pending">Chưa thanh toán</option>
+                                                }
+
+                                                @if (Model.Order.PaymentStatus == "paid")
+                                                {
+                                                    <option value="paid" selected>Đã thanh toán</option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="paid">Đã thanh toán</option>
+                                                }
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <div class="col-sm-12 text-end">
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="icofont icofont-check-circled mr-2"></i>Cập nhật
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Lịch sử đơn hàng -->
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header bg-danger text-white">
+                                <h5 class="mb-0">
+                                    <i class="icofont icofont-history mr-2"></i>Lịch sử đơn hàng
+                                </h5>
+                            </div>
+                            <div class="card-block">
+                                <ul class="timeline">
+                                    @foreach (var history in Model.OrderHistories)
+                                    {
+                                        <li class="timeline-item">
+                                            <div class="timeline-badge @history.BadgeClass">
+                                                <i class="@history.Icon"></i>
+                                            </div>
+                                            <div class="timeline-panel">
+                                                <div class="timeline-heading">
+                                                    <h6 class="timeline-title">@history.Title</h6>
+                                                    <p><small class="text-muted">@history.Timestamp.ToString("dd/MM/yyyy HH:mm:ss")</small></p>
+                                                </div>
+                                                <div class="timeline-body">
+                                                    <p>@history.Description</p>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    }
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Nút thao tác -->
+                <div class="row mt-3">
+                    <div class="col-md-12">
+                        <div class="d-flex justify-content-between">
+                            <a href="@Url.Action("Index", "Order")" class="btn btn-outline-secondary">
+                                <i class="icofont icofont-arrow-left mr-2"></i>Quay lại
+                            </a>
+                            <div>
+                                <a href="@Url.Action("PrintInvoice", "Order", new { id = Model.Order.Id })"
+                                   target="_blank" class="btn btn-outline-primary me-2">
+                                    <i class="icofont icofont-printer mr-2"></i>In hóa đơn
+                                </a>
+                                <button type="button" class="btn btn-outline-success"
+                                        onclick="sendNotification(@Model.Order.Id)">
+                                    <i class="icofont icofont-notification mr-2"></i>Gửi thông báo
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function sendNotification(orderId) {
+            $.ajax({
+                url: '@Url.Action("SendNotification", "Order")',
+                type: 'POST',
+                data: { id: orderId },
+                success: function(result) {
+                    alert('Đã gửi thông báo đến khách hàng!');
+                },
+                error: function(error) {
+                    alert('Lỗi khi gửi thông báo: ' + error.responseText);
+                }
+            });
+        }
+
+        // Thêm CSS để tùy chỉnh timeline
+        $(document).ready(function() {
+            $("<style>")
+                .prop("type", "text/css")
+                .html(`
+                    .timeline {
+                        position: relative;
+                        padding: 20px 0;
+                        list-style: none;
+                        max-height: 400px;
+                        overflow-y: auto;
+                    }
+
+                    .timeline:before {
+                        content: " ";
+                        position: absolute;
+                        top: 0;
+                        bottom: 0;
+                        left: 50px;
+                        width: 3px;
+                        background-color: #eeeeee;
+                    }
+
+                    .timeline-item {
+                        margin-bottom: 20px;
+                        position: relative;
+                    }
+
+                    .timeline-badge {
+                        color: #fff;
+                        width: 40px;
+                        height: 40px;
+                        line-height: 40px;
+                        text-align: center;
+                        position: absolute;
+                        top: 16px;
+                        left: 30px;
+                        margin-left: -20px;
+                        z-index: 100;
+                        border-radius: 50%;
+                    }
+
+                    .timeline-panel {
+                        position: relative;
+                        margin-left: 80px;
+                        background-color: #fff;
+                        border-radius: 4px;
+                        padding: 15px;
+                        box-shadow: 0 1px 6px rgba(0, 0, 0, 0.1);
+                    }
+
+                    .timeline-title {
+                        margin-top: 0;
+                        color: inherit;
+                    }
+                `)
+                .appendTo("head");
+        });
+    </script>
+}

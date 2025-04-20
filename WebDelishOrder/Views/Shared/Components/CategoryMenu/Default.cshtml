@@ -1,0 +1,20 @@
+﻿@model IEnumerable<WebDelishOrder.Models.Category>
+
+@foreach (var item in Model)
+{
+    <tr>
+        <td>@item.Name</td>
+        <td><img src="@item.ImageCategory" width="40" height="40" class="rounded-circle" /></td>
+        <td>
+            <span class="badge badge-success">@(item.IsAvailable ? "Active" : "Inactive")</span>
+        </td>
+        <td>
+            @(item.CreatedAt.HasValue ? item.CreatedAt.Value.ToString("yyyy-MM-dd HH:mm:ss") : "Không có dữ liệu")
+        </td>
+        <td>
+            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning">✏ Cập nhật</a>
+            <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger" onclick="return confirm('Are you sure?')">❌ Xóa</a>
+           
+        </td>
+    </tr>
+}

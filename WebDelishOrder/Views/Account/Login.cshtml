@@ -1,0 +1,32 @@
+﻿@model WebDelishOrder.Models.LoginViewModel
+
+@{
+    ViewBag.Title = "Login";
+}
+
+<div class="login-container">
+    <div class="login-box">
+        <h2>Login</h2>
+
+        @using (Html.BeginForm())
+        {
+            @Html.AntiForgeryToken()
+
+            <div class="form-group">
+                @Html.LabelFor(m => m.Email)
+                @Html.TextBoxFor(m => m.Email, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.Email)
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(m => m.Password)
+                @Html.PasswordFor(m => m.Password, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.Password)
+            </div>
+
+            <button type="button" class="btn btn-primary btn-block" onclick="location.href='@Url.Action("Index", "Category")'">
+                Login
+            </button>
+        }
+    </div>
+</div>

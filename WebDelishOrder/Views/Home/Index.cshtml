@@ -1,0 +1,507 @@
+﻿@{
+    ViewData["ActivePage"] = "Dashboard";
+    ViewData["PageTitle"] = "Dashboard";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="pcoded-main-container">
+    <div class="main-body">
+        <div class="page-wrapper">
+            <div class="page-body">
+                <!-- Thống kê tổng quan (KPIs) -->
+                <div class="row">
+                    <!-- Tổng doanh thu -->
+                    <div class="col-md-3">
+                        <div class="card bg-c-blue text-white">
+                            <div class="card-block">
+                                <div class="row align-items-center">
+                                    <div class="col-auto">
+                                        <i class="icofont icofont-money-bag fs-1"></i>
+                                    </div>
+                                    <div class="col text-end">
+                                        <h4 class="text-white">@ViewBag.TotalRevenue.ToString("N0") đ</h4>
+                                        <h6 class="text-white m-b-0">Doanh thu</h6>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-c-blue">
+                                <div class="row align-items-center">
+                                    <div class="col-9">
+                                        <p class="text-white m-b-0">So với tháng trước</p>
+                                    </div>
+                                    <div class="col-3 text-end">
+                                        <i class="icofont icofont-chart-line-alt text-white f-16"></i>
+                                        <span class="text-white">+@ViewBag.RevenueIncrease%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Số đơn hàng -->
+                    <div class="col-md-3">
+                        <div class="card bg-c-green text-white">
+                            <div class="card-block">
+                                <div class="row align-items-center">
+                                    <div class="col-auto">
+                                        <i class="icofont icofont-shopping-cart fs-1"></i>
+                                    </div>
+                                    <div class="col text-end">
+                                        <h4 class="text-white">@ViewBag.TotalOrders</h4>
+                                        <h6 class="text-white m-b-0">Đơn hàng</h6>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-c-green">
+                                <div class="row align-items-center">
+                                    <div class="col-9">
+                                        <p class="text-white m-b-0">So với tháng trước</p>
+                                    </div>
+                                    <div class="col-3 text-end">
+                                        <i class="icofont icofont-chart-line-alt text-white f-16"></i>
+                                        <span class="text-white">+@ViewBag.OrdersIncrease%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Khách hàng mới -->
+                    <div class="col-md-3">
+                        <div class="card bg-c-yellow text-white">
+                            <div class="card-block">
+                                <div class="row align-items-center">
+                                    <div class="col-auto">
+                                        <i class="icofont icofont-user-alt-3 fs-1"></i>
+                                    </div>
+                                    <div class="col text-end">
+                                        <h4 class="text-white">@ViewBag.NewCustomers</h4>
+                                        <h6 class="text-white m-b-0">Khách hàng mới</h6>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-c-yellow">
+                                <div class="row align-items-center">
+                                    <div class="col-9">
+                                        <p class="text-white m-b-0">So với tháng trước</p>
+                                    </div>
+                                    <div class="col-3 text-end">
+                                        <i class="icofont icofont-chart-line-alt text-white f-16"></i>
+                                        <span class="text-white">+@ViewBag.CustomersIncrease%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Đơn chờ xử lý -->
+                    <div class="col-md-3">
+                        <div class="card bg-c-pink text-white">
+                            <div class="card-block">
+                                <div class="row align-items-center">
+                                    <div class="col-auto">
+                                        <i class="icofont icofont-refresh fs-1"></i>
+                                    </div>
+                                    <div class="col text-end">
+                                        <h4 class="text-white">@ViewBag.PendingOrders</h4>
+                                        <h6 class="text-white m-b-0">Đơn chờ xử lý</h6>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-c-pink">
+                                <div class="row align-items-center">
+                                    <div class="col-9">
+                                        <a href="@Url.Action("UpdateStatus", "Order")" class="text-white">Xử lý ngay</a>
+                                    </div>
+                                    <div class="col-3 text-end">
+                                        <i class="icofont icofont-warning-alt text-white f-16"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Biểu đồ và thống kê -->
+                <div class="row">
+                    <!-- Biểu đồ doanh thu theo thời gian -->
+                    <div class="col-md-8">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>Biểu đồ doanh thu</h5>
+                                <div class="card-header-right">
+                                    <ul class="list-unstyled card-option">
+                                        <li><i class="icofont icofont-simple-left"></i></li>
+                                        <li><i class="icofont icofont-maximize full-card"></i></li>
+                                        <li><i class="icofont icofont-minus minimize-card"></i></li>
+                                        <li><i class="icofont icofont-refresh reload-card"></i></li>
+                                    </ul>
+                                </div>
+                                <div class="btn-group my-2">
+                                    <button type="button" class="btn btn-primary btn-sm active" onclick="updateChart('day')">Ngày</button>
+                                    <button type="button" class="btn btn-primary btn-sm" onclick="updateChart('week')">Tuần</button>
+                                    <button type="button" class="btn btn-primary btn-sm" onclick="updateChart('month')">Tháng</button>
+                                </div>
+                            </div>
+                            <div class="card-block">
+                                <div id="revenue-chart" style="height: 300px;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Biểu đồ tròn phân loại đơn hàng -->
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>Trạng thái đơn hàng</h5>
+                                <div class="card-header-right">
+                                    <ul class="list-unstyled card-option">
+                                        <li><i class="icofont icofont-simple-left"></i></li>
+                                        <li><i class="icofont icofont-maximize full-card"></i></li>
+                                        <li><i class="icofont icofont-minus minimize-card"></i></li>
+                                        <li><i class="icofont icofont-refresh reload-card"></i></li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="card-block">
+                                <div id="order-status-chart" style="height: 300px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Đơn hàng gần đây và món ăn phổ biến -->
+                <div class="row">
+                    <!-- Đơn hàng mới nhất -->
+                    <div class="col-md-8">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>Đơn hàng gần đây</h5>
+                                <div class="card-header-right">
+                                    <ul class="list-unstyled card-option">
+                                        <li><i class="icofont icofont-simple-left"></i></li>
+                                        <li><i class="icofont icofont-maximize full-card"></i></li>
+                                        <li><i class="icofont icofont-minus minimize-card"></i></li>
+                                        <li><i class="icofont icofont-refresh reload-card"></i></li>
+                                    </ul>
+                                </div>
+                                <div class="text-end">
+                                    <a href="@Url.Action("Index", "Order")" class="btn btn-primary btn-sm">Xem tất cả</a>
+                                </div>
+                            </div>
+                            <div class="card-block table-border-style">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Mã đơn</th>
+                                                <th>Khách hàng</th>
+                                                <th>Thời gian</th>
+                                                <th>Tổng tiền</th>
+                                                <th>Trạng thái</th>
+                                                <th>Thao tác</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var order in ViewBag.RecentOrders)
+                                            {
+                                                <tr>
+                                                    <td>#@order.Id</td>
+                                                    <td>@order.CustomerName</td>
+                                                    <td>@order.OrderDate.ToString("HH:mm dd/MM/yyyy")</td>
+                                                    <td>@order.TotalAmount.ToString("N0") đ</td>
+                                                    <td>
+                                                        @{
+                                                            string statusClass = "";
+                                                            string statusText = "";
+
+                                                            switch (order.Status)
+                                                            {
+                                                                case 0:
+                                                                    statusClass = "badge bg-warning";
+                                                                    statusText = "Chờ xác nhận";
+                                                                    break;
+                                                                case 1:
+                                                                    statusClass = "badge bg-info";
+                                                                    statusText = "Đang chuẩn bị";
+                                                                    break;
+                                                                case 2:
+                                                                    statusClass = "badge bg-primary";
+                                                                    statusText = "Đang giao hàng";
+                                                                    break;
+                                                                case 3:
+                                                                    statusClass = "badge bg-success";
+                                                                    statusText = "Đã giao hàng";
+                                                                    break;
+                                                                case 4:
+                                                                    statusClass = "badge bg-danger";
+                                                                    statusText = "Đã hủy";
+                                                                    break;
+                                                            }
+                                                        }
+                                                        <span class="@statusClass">@statusText</span>
+                                                    </td>
+                                                    <td>
+                                                        <a href="@Url.Action("Details", "Order", new { id = order.Id })" class="btn btn-outline-info btn-sm">
+                                                            <i class="icofont icofont-eye-alt"></i>
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Món ăn phổ biến -->
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>Món ăn phổ biến</h5>
+                                <div class="card-header-right">
+                                    <ul class="list-unstyled card-option">
+                                        <li><i class="icofont icofont-simple-left"></i></li>
+                                        <li><i class="icofont icofont-maximize full-card"></i></li>
+                                        <li><i class="icofont icofont-minus minimize-card"></i></li>
+                                        <li><i class="icofont icofont-refresh reload-card"></i></li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="card-block">
+                                <ul class="list-group">
+                                    @foreach (var item in ViewBag.PopularItems)
+                                    {
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            <div class="d-flex align-items-center">
+                                                <img src="@item.ImageUrl" alt="@item.Name" class="rounded" width="40" height="40">
+                                                <div class="ms-3">
+                                                    <h6 class="mb-0">@item.Name</h6>
+                                                    <small class="text-muted">@item.Price.ToString("N0") đ</small>
+                                                </div>
+                                            </div>
+                                            <span class="badge bg-primary rounded-pill">@item.OrderCount</span>
+                                        </li>
+                                    }
+                                </ul>
+                                <div class="text-center mt-3">
+                                    <a href="@Url.Action("Index", "Product")" class="btn btn-outline-primary btn-sm" id="viewAllProducts">Xem tất cả</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Phân tích khách hàng và xu hướng -->
+                <div class="row">
+                    <!-- Biểu đồ khung giờ đặt hàng -->
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>Khung giờ đặt hàng</h5>
+                                <div class="card-header-right">
+                                    <ul class="list-unstyled card-option">
+                                        <li><i class="icofont icofont-simple-left"></i></li>
+                                        <li><i class="icofont icofont-maximize full-card"></i></li>
+                                        <li><i class="icofont icofont-minus minimize-card"></i></li>
+                                        <li><i class="icofont icofont-refresh reload-card"></i></li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="card-block">
+                                <div id="order-time-chart" style="height: 300px;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Danh mục món ăn -->
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5>Doanh thu theo danh mục</h5>
+                                <div class="card-header-right">
+                                    <ul class="list-unstyled card-option">
+                                        <li><i class="icofont icofont-simple-left"></i></li>
+                                        <li><i class="icofont icofont-maximize full-card"></i></li>
+                                        <li><i class="icofont icofont-minus minimize-card"></i></li>
+                                        <li><i class="icofont icofont-refresh reload-card"></i></li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="card-block">
+                                <div id="category-revenue-chart" style="height: 300px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <!-- Thêm các script của ApexCharts -->
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
+    <script>
+        // Khởi tạo dữ liệu biểu đồ cho các phần không có vấn đề
+        var revenueData = @Html.Raw(Json.Serialize(ViewBag.RevenueData));
+        var orderTimeData = @Html.Raw(Json.Serialize(ViewBag.OrderTimeData));
+        var categoryRevenueData = @Html.Raw(Json.Serialize(ViewBag.CategoryRevenueData));
+
+        // Định nghĩa trực tiếp các nhãn tiếng Việt để tránh lỗi encoding
+        var orderStatusLabels = ["Chờ xác nhận", "Đang chuẩn bị", "Đang giao hàng", "Đã giao hàng", "Đã hủy"];
+        var orderStatusValues = @Html.Raw(Json.Serialize(ViewBag.OrderStatusData.values));
+
+        $(document).ready(function() {
+            // Biểu đồ doanh thu
+            var revenueOptions = {
+                series: [{
+                    name: 'Doanh thu',
+                    data: revenueData.values
+                }],
+                chart: {
+                    height: 300,
+                    type: 'area',
+                    toolbar: {
+                        show: false
+                    },
+                    fontFamily: 'Roboto, Arial, sans-serif' // Đảm bảo font hỗ trợ Unicode
+                },
+                dataLabels: {
+                    enabled: false
+                },
+                stroke: {
+                    curve: 'smooth'
+                },
+                xaxis: {
+                    categories: revenueData.labels
+                },
+                tooltip: {
+                    y: {
+                        formatter: function (val) {
+                            return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + ' đ';
+                        }
+                    }
+                },
+                colors: ['#4099ff']
+            };
+            var revenueChart = new ApexCharts(document.querySelector("#revenue-chart"), revenueOptions);
+            revenueChart.render();
+
+            // Biểu đồ trạng thái đơn hàng - Đã sửa để dùng nhãn đã định nghĩa trực tiếp
+            var statusOptions = {
+                series: orderStatusValues,
+                chart: {
+                    width: '100%',
+                    type: 'pie',
+                    fontFamily: 'Roboto, Arial, sans-serif' // Đảm bảo font hỗ trợ Unicode
+                },
+                labels: orderStatusLabels, // Sử dụng nhãn đã định nghĩa trực tiếp
+                colors: ['#FFB64D', '#69CEC6', '#4099ff', '#2ed8b6', '#FF5370'],
+                responsive: [{
+                    breakpoint: 480,
+                    options: {
+                        chart: {
+                            width: 200
+                        },
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }]
+            };
+            var statusChart = new ApexCharts(document.querySelector("#order-status-chart"), statusOptions);
+            statusChart.render();
+
+            // Biểu đồ khung giờ đặt hàng
+            var timeOptions = {
+                series: [{
+                    name: 'Số đơn hàng',
+                    data: orderTimeData.values
+                }],
+                chart: {
+                    height: 300,
+                    type: 'bar',
+                    toolbar: {
+                        show: false
+                    },
+                    fontFamily: 'Roboto, Arial, sans-serif' // Đảm bảo font hỗ trợ Unicode
+                },
+                plotOptions: {
+                    bar: {
+                        borderRadius: 10,
+                        columnWidth: '50%',
+                    }
+                },
+                dataLabels: {
+                    enabled: false
+                },
+                xaxis: {
+                    categories: orderTimeData.labels,
+                    axisBorder: {
+                        show: false
+                    },
+                    axisTicks: {
+                        show: false
+                    }
+                },
+                yaxis: {
+                    title: {
+                        text: 'Số lượng đơn hàng'
+                    }
+                },
+                colors: ['#2ed8b6']
+            };
+            var timeChart = new ApexCharts(document.querySelector("#order-time-chart"), timeOptions);
+            timeChart.render();
+
+            // Biểu đồ doanh thu theo danh mục
+            var categoryOptions = {
+                series: categoryRevenueData.values,
+                chart: {
+                    type: 'donut',
+                    height: 300,
+                    fontFamily: 'Roboto, Arial, sans-serif' // Đảm bảo font hỗ trợ Unicode
+                },
+                labels: categoryRevenueData.labels,
+                responsive: [{
+                    breakpoint: 480,
+                    options: {
+                        chart: {
+                            width: 200
+                        },
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }],
+                colors: ['#4099ff', '#2ed8b6', '#FFB64D', '#FF5370', '#69CEC6']
+            };
+            var categoryChart = new ApexCharts(document.querySelector("#category-revenue-chart"), categoryOptions);
+            categoryChart.render();
+        });
+
+        // Hàm cập nhật biểu đồ doanh thu theo thời gian
+        function updateChart(period) {
+            // Gọi AJAX để lấy dữ liệu mới
+            $.ajax({
+                url: '@Url.Action("GetRevenueData", "Home")',
+                type: 'GET',
+                data: { period: period },
+                success: function(data) {
+                    // Cập nhật biểu đồ
+                    ApexCharts.exec('revenue-chart', 'updateOptions', {
+                        xaxis: {
+                            categories: data.labels
+                        },
+                        series: [{
+                            data: data.values
+                        }]
+                    });
+                }
+            });
+        }
+    </script>
+}

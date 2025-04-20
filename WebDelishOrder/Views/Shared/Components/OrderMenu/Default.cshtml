@@ -1,0 +1,102 @@
+﻿@model IEnumerable<WebDelishOrder.Models.Order>
+@{
+	var customerNames = ViewBag.CustomerNames as Dictionary<int, string>;
+}
+
+@foreach (var item in Model)
+{
+	var isNew = item.RegTime > DateTime.Now.AddMinutes(-5); // Đơn hàng mới trong 5 phút
+	<tr data-order-id="@item.Id" class="@(isNew ? "table-warning" : "")">
+		<td class="toggle-detail" style="cursor: pointer;">
+			<i class="bi bi-plus-circle-fill text-primary"></i> @item.Id
+		</td>
+		<td>@item.RegTime?.ToString("yyyy-MM-dd HH:mm:ss")</td>
+		<td>
+			<!-- Display the current status -->
+			@switch (item.Status)
+			{
+				case 0:
+					<span class="badge bg-warning">Chờ xác nhận</span>
+					break;
+				case 1:
+					<span class="badge bg-info">Đang chuẩn bị</span>
+					break;
+				case 2:
+					<span class="badge bg-primary">Đang giao hàng</span>
+					break;
+				case 3:
+					<span class="badge bg-success">Đã giao hàng</span>
+					break;
+				case 4:
+					<span class="badge bg-danger">Đã hủy</span>
+					break;
+				default:
+					<span class="badge bg-secondary">Không xác định</span>
+					break;
+			}
+		</td>
+		<td>
+			<a href="/Order/PrintInvoice/@item.Id" class="btn btn-primary">In hóa đơn</a>
+		</td>
+	</tr>
+	<!-- Dòng chi tiết, mặc định ẩn -->
+	<tr class="detail-row" style="display: none;">
+		<td colspan="6">
+			<div class="order-details">
+				<strong>Tên món ăn: </strong> @item.OrderDetails?.FirstOrDefault()?.Product?.Name<br />
+				<strong>Số lượng: </strong> @item.OrderDetails?.FirstOrDefault()?.Quantity <br />
+				<strong>Tổng giá đơn hàng: </strong> @String.Format("{0:N0}", item.TotalPrice) VND <br />
+				<strong>Phương thức thanh toán: </strong>
+				@if (item.PaymentMethod == "Cash")
+				{
+					@:Tiền mặt
+				}
+				else
+				{
+					@item.PaymentMethod
+				}
+				<br />
+				<strong>Trạng thái thanh toán: </strong>
+				@if (item.PaymentStatus == "Pending")
+				{
+					@:Chưa thanh toán
+				}
+				else
+				{
+					@:Đã thanh toán
+				}
+				<br />
+				<strong>Tên khách hàng: </strong>
+				@if (customerNames.ContainsKey(item.Id))
+				{
+					@customerNames[item.Id]
+				}
+				else
+				{
+					<span class="text-danger">Không xác định</span>
+				}
+				<br/>
+				<strong>Địa chỉ giao hàng: </strong> @item.ShippingAddress <br />
+				<strong>Số điện thoại: </strong> @item.Phone <br />
+				<strong>Tùy chọn:</strong>
+				<button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editStatusModal"
+						onclick="populateOrderForm(@item.Id, '@item.Status', '@item.ShippingAddress', '@item.Phone', '@item.PaymentMethod', '@item.PaymentStatus')">
+					✏ Cập nhật trạng thái đơn hàng
+				</button>
+
+			</div>
+			@if (item.OrderDetails != null && item.OrderDetails.Count > 1)
+			{
+						<div class="mt-3">
+							<h5>Sản phẩm khác trong đơn hàng:</h5>
+							<ul>
+								@foreach (var detail in item.OrderDetails.Skip(1))
+								{
+											<li>@detail.Product?.Name - Số lượng: @detail.Quantity</li>
+								}
+							</ul>
+						</div>
+			}
+		</td>
+	</tr>
+}

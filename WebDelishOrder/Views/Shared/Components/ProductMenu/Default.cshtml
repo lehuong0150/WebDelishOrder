@@ -1,0 +1,35 @@
+﻿@model IEnumerable<WebDelishOrder.Models.Product>
+@foreach (var item in Model)
+{
+    <tr data-product-id="@item.Id">
+        <td class="toggle-detail" style="cursor: pointer;">
+            <i class="bi bi-plus-circle-fill text-primary"></i> @item.Name
+        </td>
+        <td>
+            <img src="@item.ImageProduct" alt="Image" width="50" height="50" style="object-fit: cover;" />
+        </td>
+        <td>@String.Format("{0:N0}", item.Price)</td>
+        <td>@item.Quantity</td>
+        <td>@(item.Category != null ? item.Category.Name : "N/A")</td>
+        <td>
+            @if (item.IsAvailable)
+            {
+                <button class="btn btn-success btn-sm">Action</button>
+            }
+            else
+            {
+                <button class="btn btn-secondary btn-sm">Inactive</button>
+            }
+        </td>
+    </tr>
+    <!-- Dòng chi tiết, mặc định ẩn -->
+    <tr class="detail-row" style="display: none;">
+        <td colspan="6">
+            <strong>Mô tả: </strong> @item.Descript <br />
+            <strong>Ngày tạo: </strong> @item.CreatedAt?.ToString("yyyy-MM-dd HH:mm:ss") <br />
+            <strong>Tùy chọn: </strong>
+            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning">✏ Edit</a>
+            <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger" onclick="return confirm('Are you sure?')">❌ Delete</a>
+        </td>
+    </tr>
+}

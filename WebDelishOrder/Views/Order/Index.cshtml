@@ -1,0 +1,262 @@
+﻿@model WebDelishOrder.ViewModels.OrderViewModel
+
+@{
+	ViewData["PageTitle"] = "Cập nhật đơn hàng";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="pcoded-main-container">
+	<div class="main-body">
+		<div class="page-wrapper">
+			<div class="page-body">
+				<div class="row">
+
+					<!-- Product List Section -->
+					<div class="col-sm-8">
+						<div class="card">
+							<div class="card-header">
+								<h4>Danh sách đơn hàng</h4>
+								<div class="row mb-3">
+									<!-- Search Input -->
+									<div class="col-md-4">
+										<input type="text" id="searchTerm" class="form-control" placeholder="Nhập từ khóa tìm kiếm..." />
+									</div>
+									<!-- Dropdown Lọc Trạng Thái -->
+									<div class="col-md-4">
+										<select id="orderStatusFilter" class="form-select">
+											<option value="all">Tất cả</option>
+											<option value="0">Chờ xác nhận</option>
+											<option value="1">Đang chuẩn bị</option>
+											<option value="2">Đang giao hàng</option>
+											<option value="3">Đã giao hàng</option>
+											<option value="4">Đã hủy</option>
+										</select>
+									</div>
+									<!-- Dropdown Sắp Xếp -->
+									<div class="col-md-4">
+										<select id="orderSort" class="form-select">
+											<option value="desc">Mới nhất trước</option>
+											<option value="asc">Cũ nhất trước</option>
+										</select>
+									</div>
+								</div>
+
+								<button id="btnSearch" class="btn btn-primary" type="button">Tìm kiếm</button>
+
+
+							</div>
+							<div id="content" class="card-block">
+								<table class="table table-striped">
+									<thead>
+										<tr>
+											<th>Mã đơn hàng</th>
+											<th>Thời gian đặt hàng</th>
+											<th>Trạng thái đơn</th>
+											<th>In hóa đơn</th>
+
+										</tr>
+									</thead>
+									<tbody id="orderList">
+										@await Component.InvokeAsync("OrderMenu", new { searchTerm = "", pageIndex = 1 })
+									</tbody>
+								</table>
+
+								<nav>
+									<ul class="pagination" id="pagination">
+										@for (int i = 1; i <= Model.TotalPages; i++)
+										{
+											<li class="page-item">
+												<a class="page-link" href="#" onclick="loadOrders(@i)">@i</a>
+											</li>
+										}
+									</ul>
+								</nav>
+							</div>
+						</div>
+					</div>
+					<!-- Edit Form Section -->
+					<div class="col-md-4">
+						<div class="card shadow-sm">
+							<div class="card-header bg-primary text-white text-center">
+								<h5 class="mb-1">Cập nhật trạng thái đơn hàng</h5>
+							</div>
+							<div class="card-body">
+								<form method="post" asp-action="UpdateOrder" asp-controller="Order">
+									<input type="hidden" name="id" id="orderId" value="" />
+
+									<!-- Order Status -->
+									<div class="mb-4">
+										<label for="Status" class="form-label fw-bold">
+											<i class="bi bi-clipboard-check text-primary"></i> Trạng thái đơn hàng
+										</label>
+										<select class="form-select border-primary" name="Status" id="orderStatus" required>
+											<option value="0">Chờ xác nhận</option>
+											<option value="1">Đang chuẩn bị</option>
+											<option value="2">Đang giao hàng</option>
+											<option value="3">Đã giao hàng</option>
+											<option value="4">Đã hủy</option>
+										</select>
+									</div>
+
+									<!-- Shipping Address -->
+									<div class="mb-4">
+										<label for="ShippingAddress" class="form-label fw-bold">
+											<i class="bi bi-geo-alt text-danger"></i> Địa chỉ giao hàng
+										</label>
+										<input type="text" class="form-control border-danger" name="ShippingAddress" id="orderShippingAddress" placeholder="Nhập địa chỉ giao hàng..." required />
+									</div>
+
+									<!-- Phone -->
+									<div class="mb-4">
+										<label for="Phone" class="form-label fw-bold">
+											<i class="bi bi-telephone text-success"></i> Số điện thoại
+										</label>
+										<input type="text" class="form-control border-success" name="Phone" id="orderPhone" placeholder="Nhập số điện thoại..." required />
+									</div>
+
+									<!-- Payment Method -->
+									<div class="mb-4">
+										<label for="PaymentMethod" class="form-label fw-bold">
+											<i class="bi bi-wallet2 text-warning"></i> Phương thức thanh toán
+										</label>
+										<input type="text" class="form-control border-warning" name="PaymentMethod" id="orderPaymentMethod" placeholder="Nhập phương thức thanh toán..." required />
+									</div>
+
+									<!-- Payment Status -->
+									<div class="mb-4">
+										<label for="PaymentStatus" class="form-label fw-bold">
+											<i class="bi bi-cash-coin text-info"></i> Trạng thái thanh toán
+										</label>
+										<input type="text" class="form-control border-info" name="PaymentStatus" id="orderPaymentStatus" placeholder="Nhập trạng thái thanh toán..." required />
+									</div>
+
+									<!-- Action Buttons -->
+									<div class="d-flex justify-content-between">
+										<button type="submit" class="btn btn-primary">
+											<i class="bi bi-check-circle"></i> Cập nhật
+										</button>
+										<button type="button" class="btn btn-secondary" onclick="resetForm()">
+											<i class="bi bi-x-circle"></i> Hủy
+										</button>
+									</div>
+								</form>
+							</div>
+						</div>
+					</div>
+
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+@section Scripts {
+	<script>
+
+		function loadOrders(pageIndex) {
+			var searchTerm = $('#searchTerm').val();
+			var status = $('#orderStatusFilter').val();
+			var sort = $('#orderSort').val();
+			console.log("Loading orders with:", { searchTerm, status, sort, pageIndex });
+			$.ajax({
+				url: '/Order/LoadMenu',
+				type: 'GET',
+				data: {
+					searchTerm: searchTerm,
+					status: status,
+					sort: sort,
+					pageIndex: pageIndex
+				},
+				success: function (result) {
+					$('#orderList').html(result);
+				},
+				error: function (xhr, status, error) {
+					console.error("Error loading orders:", error);
+				}
+			});
+
+			$.ajax({
+				url: '/Order/GetTotalPages',
+				type: 'GET',
+				data: {
+					searchTerm: searchTerm,
+					status: status,
+					sort: sort
+				},
+				success: function (data) {
+					var paginationHtml = '<ul class="pagination">';
+					for (var i = 1; i <= data.totalPages; i++) {
+						if (i === pageIndex) {
+							paginationHtml += '<li class="page-item active">' +
+								'<a href="#" class="page-link" onclick="loadOrders(' + i + '); return false;">' + i + '</a>' +
+								'</li>';
+						} else {
+							paginationHtml += '<li class="page-item">' +
+								'<a href="#" class="page-link" onclick="loadOrders(' + i + '); return false;">' + i + '</a>' +
+								'</li>';
+						}
+					}
+					paginationHtml += '</ul>';
+					$('#pagination').html(paginationHtml);
+				},
+				error: function (xhr, status, error) {
+					console.error("Error loading total pages:", error);
+				}
+			});
+		}
+			$(document).ready(function () {
+			// Khi bấm nút search
+			$('#btnSearch').click(function () {
+				loadOrders(1);
+			});
+
+			// Khi nhấn Enter trong ô search
+			$('#searchTerm').keypress(function (e) {
+				if (e.which === 13) {
+					loadOrders(1);
+					return false;
+				}
+			});
+
+			// Lúc mới vào trang thì tự động load page 1
+			loadOrders(1);
+		});
+		//mo them chi tiet
+		$(document).on('click', '.toggle-detail', function () {
+			console.log("clicked");
+			var mainRow = $(this).closest('tr');
+			var detailRow = mainRow.next('.detail-row');
+
+			detailRow.toggle();
+
+			var icon = $(this).find('i');
+			if (detailRow.is(':visible')) {
+				icon.removeClass('bi-plus-circle-fill text-primary')
+					.addClass('bi-dash-circle-fill text-danger');
+			} else {
+				icon.removeClass('bi-dash-circle-fill text-danger')
+					.addClass('bi-plus-circle-fill text-primary');
+			}
+		});
+		function populateOrderForm(id, status, shippingAddress, phone, paymentMethod, paymentStatus) {
+			$('#orderId').val(id);
+			$('#orderStatus').val(status);
+			$('#orderShippingAddress').val(shippingAddress);
+			$('#orderPhone').val(phone);
+				 // Convert paymentMethod to "tiền mặt" if it is "cash"
+		if (paymentMethod === "Cash") {
+			$('#orderPaymentMethod').val("Tiền mặt");
+		} else {
+			$('#orderPaymentMethod').val(paymentMethod);
+		}
+
+		// Convert paymentStatus to "chưa thanh toán" if it is "pending"
+		if (paymentStatus === "pending") {
+			$('#orderPaymentStatus').val("Chưa thanh toán");
+		} else {
+			$('#orderPaymentStatus').val(paymentStatus);
+		}
+		}
+
+	</script>
+}

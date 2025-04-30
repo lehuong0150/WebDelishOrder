@@ -7,6 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="wwwroot\assets\sound\**" />
+    <Content Remove="wwwroot\assets\sound\**" />
+    <EmbeddedResource Remove="wwwroot\assets\sound\**" />
+    <None Remove="wwwroot\assets\sound\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Include="wwwroot\assets\css\animate.css\css\animate.css" />
     <None Include="wwwroot\assets\css\bootstrap\css\bootstrap.min.css" />
     <None Include="wwwroot\assets\css\jquery.mCustomScrollbar.css" />
@@ -112,11 +119,6 @@
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.7" />
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="8.0.3" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Repository\" />
-    <Folder Include="wwwroot\assets\sound\" />
   </ItemGroup>
 
 </Project>

@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
-using WebDelishOrder.Hubs;
 using WebDelishOrder.Models;
 using WebDelishOrder.ViewModels;
 
@@ -10,19 +9,14 @@ namespace WebDelishOrder.Controllers
     public class OrderController : Controller
     {
         private readonly AppDbContext _context;
-        private readonly IHubContext<OrderHub> _hubContext;
-
+       
         // Constructor to initialize the DbContext
-        public OrderController(AppDbContext context, IHubContext<OrderHub> hubContext)
+        public OrderController(AppDbContext context)
         {
             _context = context;
-            _hubContext = hubContext;
         }
 
-        private void NotifyAdminNewOrder(int orderId)
-        {
-            _hubContext.Clients.All.SendAsync("ReceiveNewOrder", orderId);
-        }
+   
         // Display the list of orders with pagination and search functionality
         public IActionResult Index(int page = 1, string searchTerm = "", string status = "all", string sort = "desc")
         {
@@ -38,7 +32,8 @@ namespace WebDelishOrder.Controllers
             {
                 ordersQuery = ordersQuery.Where(o =>
                     (o.ShippingAddress != null && o.ShippingAddress.Contains(searchTerm)) ||
-                    (o.AccountEmail != null && o.AccountEmail.Contains(searchTerm)));
+                    (o.AccountEmail != null && o.AccountEmail.Contains(searchTerm))|| 
+                    (o.Phone != null && o.Phone.Contains(searchTerm)));
             }
 
             // Lọc theo trạng thái đơn
@@ -138,7 +133,8 @@ namespace WebDelishOrder.Controllers
             {
                 query = query.Where(o =>
                     (o.ShippingAddress != null && o.ShippingAddress.Contains(searchTerm)) ||
-                    (o.AccountEmail != null && o.AccountEmail.Contains(searchTerm)));
+                    (o.AccountEmail != null && o.AccountEmail.Contains(searchTerm))||
+                    (o.Phone != null && o.Phone.Contains(searchTerm)));
             }
             // Apply status filter
             if (!string.IsNullOrEmpty(status) && status != "all")
@@ -265,32 +261,49 @@ namespace WebDelishOrder.Controllers
             return View("Invoice", order);
         }
 
-        [HttpPost]
-        [Route("api/OrderApi/orders")]
-        public async Task<IActionResult> CreateOrderFromApp([FromBody] Order newOrder)
+
+        // Sửa lại phương thức CreateOrder để thêm thông báo
+        [HttpPost("orders")]
+        public async Task<IActionResult> CreateOrder([FromBody] Order order)
         {
-            if (newOrder == null)
+            if (!ModelState.IsValid)
             {
-                return BadRequest("Invalid order data.");
+                return BadRequest(ModelState);
+            }
+
+            // Gán thời gian nếu client không gửi lên
+            if (order.RegTime == null)
+            {
+                order.RegTime = DateTime.Now;
+            }
+
+            // Kiểm tra đơn hàng có chi tiết hay không
+            if (order.OrderDetails == null || order.OrderDetails.Count == 0)
+            {
+                return BadRequest("Đơn hàng phải có ít nhất 1 món.");
             }
 
             try
             {
-                // Lưu đơn hàng mới vào cơ sở dữ liệu
-                _context.Orders.Add(newOrder);
-                await _context.SaveChangesAsync();
+                _context.Orders.Add(order);
+                _context.SaveChanges();
 
-                // Gửi thông báo thời gian thực qua SignalR
-                await _hubContext.Clients.All.SendAsync("ReceiveNewOrder", newOrder.Id);
+                // Tạo thông báo khi có đơn hàng mới
+                string customerName = await _context.Accounts
+                    .Where(a => a.Email == order.AccountEmail)
+                    .Select(a => a.Fullname)
+                    .FirstOrDefaultAsync() ?? "Khách hàng";
 
-                return Ok(new { success = true, message = "Order created successfully.", orderId = newOrder.Id });
+                string notificationDetails = $"Đơn hàng mới #{order.Id} từ {customerName}, giá trị {order.TotalPrice:N0} VNĐ";
+                //await _notificationService.AddNotification(order.Id, notificationDetails);
+
+                return Ok(order);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { success = false, message = "An error occurred while creating the order.", error = ex.Message });
+                return StatusCode(500, "Lỗi server: " + ex.Message);
             }
         }
-
 
 
         // Action Details trong OrderController

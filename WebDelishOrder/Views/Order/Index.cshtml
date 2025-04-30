@@ -42,8 +42,6 @@
 								</div>
 
 								<button id="btnSearch" class="btn btn-primary" type="button">Tìm kiếm</button>
-
-
 							</div>
 							<div id="content" class="card-block">
 								<table class="table table-striped">
@@ -53,7 +51,6 @@
 											<th>Thời gian đặt hàng</th>
 											<th>Trạng thái đơn</th>
 											<th>In hóa đơn</th>
-
 										</tr>
 									</thead>
 									<tbody id="orderList">
@@ -81,21 +78,30 @@
 								<h5 class="mb-1">Cập nhật trạng thái đơn hàng</h5>
 							</div>
 							<div class="card-body">
-								<form method="post" asp-action="UpdateOrder" asp-controller="Order">
+								<form method="post" asp-action="UpdateOrder" asp-controller="Order" id="updateOrderForm">
 									<input type="hidden" name="id" id="orderId" value="" />
+
+									<!-- Trạng thái hiện tại hiển thị -->
+									<div class="mb-3">
+										<label class="form-label fw-bold">
+											<i class="bi bi-info-circle text-info"></i> Trạng thái hiện tại
+										</label>
+										<div id="currentStatusDisplay" class="form-control bg-light">
+											<!-- Sẽ được cập nhật bởi JavaScript -->
+										</div>
+									</div>
 
 									<!-- Order Status -->
 									<div class="mb-4">
 										<label for="Status" class="form-label fw-bold">
-											<i class="bi bi-clipboard-check text-primary"></i> Trạng thái đơn hàng
+											<i class="bi bi-clipboard-check text-primary"></i> Cập nhật trạng thái
 										</label>
 										<select class="form-select border-primary" name="Status" id="orderStatus" required>
-											<option value="0">Chờ xác nhận</option>
-											<option value="1">Đang chuẩn bị</option>
-											<option value="2">Đang giao hàng</option>
-											<option value="3">Đã giao hàng</option>
-											<option value="4">Đã hủy</option>
+											<!-- Sẽ được cập nhật bởi JavaScript -->
 										</select>
+										<div id="statusChangeDisabled" class="text-danger mt-2" style="display: none;">
+											<i class="bi bi-exclamation-triangle"></i> Đơn hàng này không thể chuyển sang trạng thái khác.
+										</div>
 									</div>
 
 									<!-- Shipping Address -->
@@ -122,17 +128,20 @@
 										<input type="text" class="form-control border-warning" name="PaymentMethod" id="orderPaymentMethod" placeholder="Nhập phương thức thanh toán..." required />
 									</div>
 
-									<!-- Payment Status -->
+									<!-- Payment Status - Changed to dropdown -->
 									<div class="mb-4">
 										<label for="PaymentStatus" class="form-label fw-bold">
 											<i class="bi bi-cash-coin text-info"></i> Trạng thái thanh toán
 										</label>
-										<input type="text" class="form-control border-info" name="PaymentStatus" id="orderPaymentStatus" placeholder="Nhập trạng thái thanh toán..." required />
+										<select class="form-select border-info" name="PaymentStatus" id="orderPaymentStatus" required>
+											<option value="Đã thanh toán">Đã thanh toán</option>
+											<option value="Chưa thanh toán">Chưa thanh toán</option>
+										</select>
 									</div>
 
 									<!-- Action Buttons -->
 									<div class="d-flex justify-content-between">
-										<button type="submit" class="btn btn-primary">
+										<button type="submit" id="btnUpdateOrder" class="btn btn-primary">
 											<i class="bi bi-check-circle"></i> Cập nhật
 										</button>
 										<button type="button" class="btn btn-secondary" onclick="resetForm()">
@@ -152,6 +161,32 @@
 
 @section Scripts {
 	<script>
+		// Định nghĩa tên trạng thái
+		const statusName = {
+			'0': 'Chờ xác nhận',
+			'1': 'Đang chuẩn bị',
+			'2': 'Đang giao hàng',
+			'3': 'Đã giao hàng',
+			'4': 'Đã hủy'
+		};
+
+		// Định nghĩa quy tắc chuyển trạng thái
+		const statusTransitions = {
+			'0': ['0', '1', '4'],      // Chờ xác nhận -> (Giữ nguyên, Đang chuẩn bị, Đã hủy)
+			'1': ['1', '2', '4'],      // Đang chuẩn bị -> (Giữ nguyên, Đang giao hàng, Đã hủy)
+			'2': ['2', '3'],           // Đang giao hàng -> (Giữ nguyên, Đã giao hàng)
+			'3': ['3'],                // Đã giao hàng -> (Không thể chuyển đổi)
+			'4': ['4']                 // Đã hủy -> (Không thể chuyển đổi)
+		};
+
+		// CSS classes cho các trạng thái
+		const statusColors = {
+			'0': 'bg-warning text-dark',
+			'1': 'bg-info text-white',
+			'2': 'bg-primary text-white',
+			'3': 'bg-success text-white',
+			'4': 'bg-danger text-white'
+		};
 
 		function loadOrders(pageIndex) {
 			var searchTerm = $('#searchTerm').val();
@@ -204,24 +239,92 @@
 				}
 			});
 		}
-			$(document).ready(function () {
-			// Khi bấm nút search
-			$('#btnSearch').click(function () {
-				loadOrders(1);
+
+		// Cập nhật dropdown status theo quy tắc chuyển trạng thái
+		function updateStatusDropdown(currentStatus) {
+			// Xóa tất cả options hiện tại
+			$('#orderStatus').empty();
+
+			// Đảm bảo status là số nguyên
+			currentStatus = parseInt(currentStatus);
+
+			// Lấy các trạng thái được phép chuyển đổi
+			const allowedStatuses = statusTransitions[currentStatus] || [];
+
+			// Kiểm tra nếu chỉ có 1 trạng thái và là trạng thái hiện tại
+			if (allowedStatuses.length === 1 && allowedStatuses[0] === currentStatus.toString()) {
+				$('#statusChangeDisabled').show();
+			} else {
+				$('#statusChangeDisabled').hide();
+			}
+
+			// Thêm các options được phép
+			allowedStatuses.forEach(status => {
+				$('#orderStatus').append($('<option>', {
+					value: status,
+					text: statusName[status]
+				}));
 			});
 
-			// Khi nhấn Enter trong ô search
-			$('#searchTerm').keypress(function (e) {
-				if (e.which === 13) {
-					loadOrders(1);
-					return false;
-				}
-			});
+			// Chọn trạng thái hiện tại
+			$('#orderStatus').val(currentStatus);
+		}
 
-			// Lúc mới vào trang thì tự động load page 1
-			loadOrders(1);
-		});
-		//mo them chi tiet
+		// Hàm điền thông tin form
+		function populateOrderForm(id, status, shippingAddress, phone, paymentMethod, paymentStatus) {
+			// Log cho debug
+			console.log("Populating form:", { id, status, shippingAddress, phone, paymentMethod, paymentStatus });
+
+			// Cập nhật ID và các thông tin khác
+			$('#orderId').val(id);
+
+			// Hiển thị trạng thái hiện tại
+			$('#currentStatusDisplay').text(statusName[status]);
+			$('#currentStatusDisplay').removeClass('bg-light bg-warning bg-info bg-primary bg-success bg-danger')
+									 .addClass(statusColors[status] || 'bg-light');
+
+			// Cập nhật dropdown status theo quy tắc chuyển trạng thái
+			updateStatusDropdown(status);
+
+			// Điền các thông tin khác
+			$('#orderShippingAddress').val(shippingAddress);
+			$('#orderPhone').val(phone);
+
+			// Convert paymentMethod to "tiền mặt" if it is "cash"
+			if (paymentMethod === "Cash") {
+				$('#orderPaymentMethod').val("Tiền mặt");
+			} else {
+				$('#orderPaymentMethod').val(paymentMethod);
+			}
+
+			// Convert paymentStatus to "chưa thanh toán" if it is "pending"
+			  if (
+					paymentStatus === "Đã thanh toán"||
+					// Trường hợp 1: Thanh toán bằng MoMo
+					 paymentMethod === "MoMo" || paymentMethod === "momo" ||
+					 // Trường hợp 2: Thanh toán tiền mặt và đơn hàng đã giao hàng (status = 3)
+					(paymentMethod === "Tiền mặt" && status === '3')) {
+				$('#orderPaymentStatus').val("Đã thanh toán");
+			} else {
+				$('#orderPaymentStatus').val("Chưa thanh toán");
+			}
+		}
+
+		// Hàm reset form
+		function resetForm() {
+			$('#orderId').val('');
+			$('#currentStatusDisplay').text('Chưa chọn đơn hàng');
+			$('#currentStatusDisplay').removeClass('bg-warning bg-info bg-primary bg-success bg-danger')
+									.addClass('bg-light');
+			$('#orderStatus').empty();
+			$('#orderShippingAddress').val('');
+			$('#orderPhone').val('');
+			$('#orderPaymentMethod').val('');
+			$('#orderPaymentStatus').val('Chưa thanh toán'); // Đặt giá trị mặc định
+			$('#statusChangeDisabled').hide();
+		}
+
+		// Mở chi tiết đơn hàng khi click
 		$(document).on('click', '.toggle-detail', function () {
 			console.log("clicked");
 			var mainRow = $(this).closest('tr');
@@ -238,25 +341,41 @@
 					.addClass('bi-plus-circle-fill text-primary');
 			}
 		});
-		function populateOrderForm(id, status, shippingAddress, phone, paymentMethod, paymentStatus) {
-			$('#orderId').val(id);
-			$('#orderStatus').val(status);
-			$('#orderShippingAddress').val(shippingAddress);
-			$('#orderPhone').val(phone);
-				 // Convert paymentMethod to "tiền mặt" if it is "cash"
-		if (paymentMethod === "Cash") {
-			$('#orderPaymentMethod').val("Tiền mặt");
-		} else {
-			$('#orderPaymentMethod').val(paymentMethod);
-		}
 
-		// Convert paymentStatus to "chưa thanh toán" if it is "pending"
-		if (paymentStatus === "pending") {
-			$('#orderPaymentStatus').val("Chưa thanh toán");
-		} else {
-			$('#orderPaymentStatus').val(paymentStatus);
-		}
-		}
+		// Xác nhận khi hủy đơn hàng
+		$('#updateOrderForm').on('submit', function(e) {
+			var newStatus = $('#orderStatus').val();
+			var currentDisplayStatus = $('#currentStatusDisplay').text();
 
+			// Nếu chuyển sang trạng thái Đã hủy, yêu cầu xác nhận
+			if (newStatus === '4' && currentDisplayStatus !== 'Đã hủy') {
+				if (!confirm('Bạn có chắc chắn muốn HỦY đơn hàng này không?')) {
+					e.preventDefault();
+					return false;
+				}
+			}
+			return true;
+		});
+
+		$(document).ready(function () {
+			// Khi bấm nút search
+			$('#btnSearch').click(function () {
+				loadOrders(1);
+			});
+
+			// Khi nhấn Enter trong ô search
+			$('#searchTerm').keypress(function (e) {
+				if (e.which === 13) {
+					loadOrders(1);
+					return false;
+				}
+			});
+
+			// Lúc mới vào trang thì tự động load page 1
+			loadOrders(1);
+
+			// Khởi tạo form
+			resetForm();
+		});
 	</script>
 }

@@ -111,12 +111,26 @@
 							</li>
 						</ul>
 						<ul class="nav-right">
-							<li class="header-notification">
-								<a href="#!" id="notificationBell">
-									<i class="ti-bell"></i>
-									<span id="newOrderBadge" class="badge bg-c-pink">0</span>
-								</a>
-							</li>
+                            <!-- Trong phần notification-bell li -->
+                            <li class="header-notification">
+                                <a href="#!" id="notificationBell">
+                                    <i class="ti-bell"></i>
+                                    <span id="newOrderBadge" class="badge bg-c-pink">0</span>
+                                </a>
+                                <ul class="show-notification" id="notificationDropdown">
+                                    <li>
+                                        <h6>Thông báo</h6>
+                                        <label class="label label-danger">Mới</label>
+                                    </li>
+                                    <!-- Notifications will be inserted here by JavaScript -->
+                                    <li class="text-center" id="emptyNotification">
+                                        <p>Không có thông báo nào</p>
+                                    </li>
+                                    <li class="text-center">
+                                        <a href="#!" id="markAllAsRead">Đánh dấu tất cả đã đọc</a>
+                                    </li>
+                                </ul>
+                            </li>
 							<li>
 								<button onclick="toggleSound()">Tắt/Bật âm thanh</button>
 							</li>
@@ -296,49 +310,8 @@
          });
     </script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/5.0.17/signalr.min.js"></script>
-	<script>
-		const connection = new signalR.HubConnectionBuilder()
-			.withUrl("/orderHub") // kiểm tra đúng tên mapHub chưa
-			.build();
+	<script src="~/assets/js/notifications.js"></script>
 
-		let soundEnabled = localStorage.getItem("soundEnabled") !== "false";
-
-		connection.on("ReceiveNewOrder", function (orderId) {
-			alert(`Đơn hàng mới vừa được tạo: #${orderId}`);
-
-			if (soundEnabled) {
-				const audio = new Audio('/assets/sounds/notification_sound.mp3');
-				audio.play();
-			}
-
-			const badge = document.getElementById("newOrderBadge");
-			if (badge) {
-				let count = parseInt(badge.innerText) || 0;
-				badge.innerText = count + 1;
-			}
-		});
-
-		connection.on("OrderStatusChanged", function (orderId, status) {
-			alert(`Đơn hàng #${orderId} vừa được cập nhật trạng thái: ${status}`);
-		});
-
-		connection.start()
-			.then(() => console.log("✅ Đã kết nối SignalR thành công"))
-			.catch(err => console.error("❌ Lỗi kết nối SignalR:", err));
-
-		function toggleSound() {
-			soundEnabled = !soundEnabled;
-			localStorage.setItem("soundEnabled", soundEnabled);
-			alert(`Âm thanh thông báo đã ${soundEnabled ? "bật" : "tắt"}`);
-		}
-
-		function autoRefresh(interval) {
-			setInterval(() => {
-				location.reload();
-			}, interval * 60 * 1000);
-		}
-		autoRefresh(3);
-	</script>
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>

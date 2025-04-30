@@ -73,29 +73,28 @@ namespace WebDelishOrder.Controllers
         }
 
 
-        // Xử lý khi nhấn "Add"
         [HttpPost]
-        public IActionResult Create(CategoryViewModel model, IFormFile ImageFile)
+        public IActionResult Create(CategoryViewModel model, IFormFile ImageFile, string ImageUrl)
         {
             var category = model.NewCategory;
 
-            Console.WriteLine($"Category ID: {category.Id}, Category Name: {category.Name}, Is Available: {category.IsAvailable}, Create: { category.CreatedAt}");
+            Console.WriteLine($"Category ID: {category.Id}, Category Name: {category.Name}, Is Available: {category.IsAvailable}, Create: {category.CreatedAt}");
             Console.WriteLine($"Image File: {(ImageFile != null ? ImageFile.FileName : "No file uploaded")}");
+            Console.WriteLine($"Image URL: {ImageUrl}");
 
             if (!ModelState.IsValid)
             {
-                // Log lỗi để debug (nếu cần)
                 var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
                 foreach (var error in errors)
                 {
                     Console.WriteLine("Model Error: " + error);
                 }
 
-                // Trả lại view với dữ liệu cũ
                 model.categories = _context.Categories.ToList();
                 return View("Index", model);
             }
 
+            // Xử lý upload ảnh
             if (ImageFile != null && ImageFile.Length > 0)
             {
                 string uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");
@@ -111,17 +110,19 @@ namespace WebDelishOrder.Controllers
 
                 category.ImageCategory = "/uploads/" + fileName;
             }
+            else if (!string.IsNullOrEmpty(ImageUrl))
+            {
+                category.ImageCategory = ImageUrl; // dùng link ảnh nhập tay
+            }
 
-            // Không cần kiểm tra và gán ID mới khi thêm, vì ID sẽ tự động được gán khi dữ liệu được lưu vào DB.
             category.CreatedAt = DateTime.Now;
 
-            // Thêm Category mới vào DB
             _context.Categories.Add(category);
             _context.SaveChanges();
 
-            // Sau khi thêm thành công, chuyển hướng về trang Index
             return RedirectToAction("Index");
         }
+
 
 
         // Xử lý khi nhấn "Clear"

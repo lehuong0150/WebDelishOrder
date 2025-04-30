@@ -1,10 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using WebDelishOrder.Controllers;
-using WebDelishOrder.Hubs;
 using WebDelishOrder.Models;
-using WebDelishOrder.Service;
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Cấu hình AppDbContext sử dụng MySQL
@@ -23,8 +20,16 @@ builder.Services.AddAuthentication("CookieAuth")
     });
 
 builder.Services.AddControllersWithViews();
-builder.Services.AddSignalR();//// Thêm SignalR
-builder.Services.AddScoped<OrderHubService>();
+
+// Thêm SignalR
+builder.Services.AddSignalR();
+
+// Thêm Order Notification Service - đăng ký singleton để duy trì trạng thái
+//builder.Services.AddSingleton<OrderNotificationService>();
+
+// Đăng ký Order Hub Service với scope
+//builder.Services.AddScoped<OrderNotificationService>();
+
 // Cấu hình CORS
 builder.Services.AddCors(options =>
 {
@@ -39,12 +44,14 @@ builder.Services.AddCors(options =>
 
 builder.WebHost.ConfigureKestrel(serverOptions =>
 {
-    serverOptions.Listen(System.Net.IPAddress.Parse("172.19.201.61"), 7010); // HTTP
+    serverOptions.Listen(System.Net.IPAddress.Parse("192.168.1.8"), 7010); // HTTP
 });
 
 var app = builder.Build();
+
 // Bật middleware CORS
 app.UseCors("AllowAllOrigins");
+
 // Cấu hình middleware
 app.UseHttpsRedirection();
 app.UseStaticFiles();
@@ -56,11 +63,17 @@ app.UseAuthentication();
 
 // Kích hoạt Authorization Middleware để kiểm tra quyền truy cập
 app.UseAuthorization();
-app.MapHub<OrderHub>("/orderHub");
 
+// Cấu hình Endpoints
+app.UseEndpoints(endpoints =>
+{
+    // Map SignalR hub
+   // endpoints.MapHub<OrderNotificationHub>("/orderNotificationHub");
 
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");  // Điều hướng đến trang Login khi cần
+    // Map controller routes
+    endpoints.MapControllerRoute(
+        name: "default",
+        pattern: "{controller=Account}/{action=Login}/{id?}");
+});
 
 app.Run();

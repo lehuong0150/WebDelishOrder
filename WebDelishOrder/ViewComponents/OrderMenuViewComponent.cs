@@ -26,7 +26,8 @@ namespace WebDelishOrder.ViewComponents
             {
                 query = query.Where(o =>
                     (o.ShippingAddress != null && o.ShippingAddress.Contains(searchTerm)) ||
-                    (o.AccountEmail != null && o.AccountEmail.Contains(searchTerm)));
+                    (o.AccountEmail != null && o.AccountEmail.Contains(searchTerm))||
+                     (o.Phone != null && o.Phone.Contains(searchTerm)));
             }
 
             // Lọc theo trạng thái

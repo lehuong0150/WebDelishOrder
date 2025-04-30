@@ -7,8 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
-using WebDelishOrder.Hubs;
-using WebDelishOrder.Service;
+
 
 [ApiController]
 [Route("api/[controller]")]
@@ -22,7 +21,7 @@ public class OrderApiController : ControllerBase
     }
 
     // ROLE_CUSTOMER: Xem danh sách đơn hàng của chính mình
-   //[Authorize(Roles = "ROLE_CUSTOMER")]
+    //[Authorize(Roles = "ROLE_CUSTOMER")]
     // GET: api/OrderApi?email=user@example.com&status=all/0,1,2/4
     [HttpGet]
     public async Task<ActionResult<IEnumerable<object>>> GetOrders(string email, string status = "all")
@@ -145,7 +144,7 @@ public class OrderApiController : ControllerBase
                     order.TotalPrice,
                     // Để tạm thời null, sẽ xác định sau khi có thông tin OrderDetail
                     isRate = (bool?)null,
-                    OrderDetail = _context.OrderDetails
+                    OrderDetails = _context.OrderDetails
                         .Where(od => od.OrderId == order.Id)
                         .Select(od => new
                         {
@@ -185,8 +184,8 @@ public class OrderApiController : ControllerBase
             orderTemp.PaymentStatus,
             orderTemp.TotalPrice,
             // Chỉ true khi TẤT CẢ sản phẩm đều đã được đánh giá
-            isRate = orderTemp.OrderDetail.Count > 0 && orderTemp.OrderDetail.All(od => od.isRated),
-            orderTemp.OrderDetail
+            isRate = orderTemp.OrderDetails.Count > 0 && orderTemp.OrderDetails.All(od => od.isRated),
+            orderTemp.OrderDetails
         };
 
         return Ok(order);
@@ -270,27 +269,6 @@ public class OrderApiController : ControllerBase
     }
 
 
-    // ROLE_ADMIN: Xóa bất kỳ đơn hàng nào
-    [Authorize(Roles = "ROLE_ADMIN")]
-    [HttpDelete("admin/{id}")]
-    public async Task<IActionResult> AdminDeleteOrder(int id)
-    {
-        var existingOrder = await _context.Orders.FindAsync(id);
-        if (existingOrder == null)
-        {
-            return NotFound();
-        }
-
-        // Xóa tất cả OrderDetails liên quan trước
-        var orderDetails = await _context.OrderDetails.Where(od => od.OrderId == id).ToListAsync();
-        _context.OrderDetails.RemoveRange(orderDetails);
-
-        // Sau đó xóa Order
-        _context.Orders.Remove(existingOrder);
-        await _context.SaveChangesAsync();
-
-        return NoContent();
-    }
 
     // Thêm endpoint lọc theo ngày
     [HttpGet("filter")]
@@ -497,22 +475,5 @@ public class OrderApiController : ControllerBase
     }
 
 
-    [HttpPost("admin/confirm/{id}")]
-    public async Task<IActionResult> ConfirmOrder(int id, [FromServices] OrderHubService hubService)
-    {
-        var order = await _context.Orders.FindAsync(id);
-        if (order == null)
-        {
-            return NotFound("Order not found");
-        }
-
-        // Cập nhật trạng thái đơn hàng
-        order.Status = 1; // Ví dụ: Confirmed
-        await _context.SaveChangesAsync();
-
-        // Gọi service để gửi thông báo SignalR
-        await hubService.NotifyOrderStatusChange(order.Id, "Confirmed");
-
-        return Ok("Order confirmed");
-    }
 }
+

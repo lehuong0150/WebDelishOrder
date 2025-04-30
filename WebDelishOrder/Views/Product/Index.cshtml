@@ -45,21 +45,23 @@
                                         <label>Số lượng: </label>
                                         @Html.TextBoxFor(m => m.NewProduct.Quantity, new { @class = "form-control", type = "number", step = "0", required = "required" })
                                     </div>
+                                        <div class="form-group">
+                                            <label>Chọn ảnh từ máy:</label>
+                                            <input type="file" name="ImageFile" class="form-control" />
 
-                                    <div class="form-group">
-                                        <label>Ảnh: </label>
-                                        <input type="file" name="ImageFile" class="form-control" />
+                                            <label style="margin-top:10px;">Hoặc dán link ảnh (URL):</label>
+                                            <input type="text" name="ImageUrl" class="form-control" value="@Model.NewProduct.ImageProduct" placeholder="https://..." />
 
-                                        @if (!string.IsNullOrEmpty(Model.NewProduct.ImageProduct))
-                                        {
-                                            <div style="margin-top:10px;">
-                                                <img src="@Model.NewProduct.ImageProduct" width="100" height="100" style="border:1px solid #ddd; padding:5px;" />
-                                            </div>
-                                        }
+                                            @if (!string.IsNullOrEmpty(Model.NewProduct.ImageProduct))
+                                            {
+                                                <div style="margin-top:10px;">
+                                                    <img src="@Model.NewProduct.ImageProduct" width="100" height="100" style="border:1px solid #ddd; padding:5px;" />
+                                                </div>
+                                            }
 
-                                        <!-- Truyền link ảnh cũ để giữ lại nếu không upload ảnh mới -->
-                                        @Html.HiddenFor(m => m.NewProduct.ImageProduct)
-                                    </div>
+                                            @Html.HiddenFor(m => m.NewProduct.ImageProduct)
+                                        </div>
+
 
                                     <div class="form-group">
                                         <label>Danh mục: </label>
@@ -81,9 +83,9 @@
                                     </div>
 
                                     <button type="submit" class="btn btn-primary">
-                                        @(Model.NewProduct.Id != 0 ? "Update" : "Add") <!-- Tùy theo hành động -->
+                                        @(Model.NewProduct.Id != 0 ? "Cập nhật" : "Thêm") <!-- Tùy theo hành động -->
                                     </button>
-                                    <button type="reset" class="btn btn-secondary">Clear</button>
+                                    <button type="reset" class="btn btn-secondary">Xóa</button>
                                 }
                             </div>
                         </div>

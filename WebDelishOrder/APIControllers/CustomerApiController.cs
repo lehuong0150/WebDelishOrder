@@ -68,14 +68,37 @@ namespace WebDelishOrder.APIControllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutCustomer(int id, Customer customer)
         {
-            if (id != customer.Id)
+            try
             {
-                return BadRequest();
+                if (id != customer.Id)
+                {
+                    return BadRequest(new { message = "ID không khớp" });
+                }
+
+                var existingCustomer = await _context.Customers.FindAsync(id);
+                if (existingCustomer == null)
+                {
+                    return NotFound(new { message = "Không tìm thấy khách hàng" });
+                }
+
+                // Cập nhật thông tin cá nhân
+                existingCustomer.Name = customer.Name;
+                existingCustomer.Phone = customer.Phone;
+                existingCustomer.Address = customer.Address;
+                existingCustomer.AccountEmail = customer.AccountEmail;
+                existingCustomer.Birthdate = customer.Birthdate;
+                existingCustomer.Gender = customer.Gender;
+                existingCustomer.Avatar = customer.Avatar;
+
+                await _context.SaveChangesAsync();
+                return Ok(new { message = "Cập nhật thành công", customer = existingCustomer });
             }
-            _context.Entry(customer).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
-            return NoContent();
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Lỗi: " + ex.Message });
+            }
         }
+
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCustomer(int id)

@@ -3,9 +3,11 @@ using WebDelishOrder.Models;
 using WebDelishOrder.ViewModels;
 using System.Web;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 
 namespace WebDelishOrder.Controllers
 {
+    [Authorize(Roles = "ROLE_ADMIN")]
     public class CategoryController : Controller
     {
         private readonly AppDbContext _context;

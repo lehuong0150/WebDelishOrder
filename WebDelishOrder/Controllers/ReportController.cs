@@ -14,9 +14,12 @@ using OfficeOpenXml;
 using System.IO;
 using NuGet.Packaging;
 using System.ComponentModel;
+using Microsoft.AspNetCore.Authorization;
 
 namespace WebDelishOrder.Controllers
 {
+    [Authorize(Roles = "ROLE_ADMIN")]
+
     public class ReportController : Controller
     {
         private readonly AppDbContext _context;

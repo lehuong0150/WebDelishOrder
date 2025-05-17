@@ -21,9 +21,16 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddAuthentication("CookieAuth")
     .AddCookie("CookieAuth", options =>
     {
-        options.LoginPath = "/Account/Login";  // Đường dẫn đến trang đăng nhập
+        options.LoginPath = "/Account/Login";// Đường dẫn đến trang đăng nhập
+        options.AccessDeniedPath = "/Account/AccessDenied";
         options.ExpireTimeSpan = TimeSpan.FromMinutes(60);  // Thời gian sống của cookie
     });
+// Configurar autorización
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminOnly", policy => policy.RequireRole("ROLE_ADMIN"));
+});
+
 
 // Thêm SignalR
 // Thêm dịch vụ SignalR

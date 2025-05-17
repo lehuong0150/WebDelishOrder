@@ -5,6 +5,7 @@ using WebDelishOrder.Models;
 using Microsoft.EntityFrameworkCore;
 using NuGet.Configuration;
 using Microsoft.AspNetCore.Authorization;
+using DocumentFormat.OpenXml.Spreadsheet;
 
 namespace WebDelishOrder.Controllers
 {
@@ -32,8 +33,9 @@ namespace WebDelishOrder.Controllers
             {
                 // Kiểm tra thông tin đăng nhập trong cơ sở dữ liệu
                 var isValidUser = await _context.Accounts
-                    .Where(a => a.Email == model.Email && a.Password == model.Password)
-                    .FirstOrDefaultAsync();
+                     .Include(a => a.Roles)
+                     .Where(a => a.Email == model.Email && a.Password == model.Password)
+                     .FirstOrDefaultAsync();
 
                 if (isValidUser != null)
                 {
@@ -41,8 +43,12 @@ namespace WebDelishOrder.Controllers
                     var claims = new List<Claim>
                 {
                     new Claim(ClaimTypes.Name, model.Email),
-                    //new Claim(ClaimTypes., authority.Role.Name)
+                    new Claim(ClaimTypes.Email, model.Email)
                 };
+                    foreach (var role in isValidUser.Roles)
+                    {
+                        claims.Add(new Claim(ClaimTypes.Role, role.Name));
+                    }
 
                     var identity = new ClaimsIdentity(claims, "CookieAuth");
                     var principal = new ClaimsPrincipal(identity);

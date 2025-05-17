@@ -31,6 +31,7 @@ public partial class AppDbContext : DbContext
     public virtual DbSet<Product> Products { get; set; }
 
     public virtual DbSet<Role> Roles { get; set; }
+    //public virtual DbSet<Authority> Authorities { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
@@ -305,6 +306,19 @@ public partial class AppDbContext : DbContext
                 .UseCollation("utf8mb3_general_ci")
                 .HasCharSet("utf8mb3");
         });
+       // modelBuilder.Entity<Authority>()
+       //.HasKey(a => new { a.AccountEmail, a.RoleId });
+
+       // modelBuilder.Entity<Authority>()
+       //     .HasOne(a => a.Account)
+       //     .WithMany(a => a.Authorities)
+       //     .HasForeignKey(a => a.AccountEmail)
+       //     .OnDelete(DeleteBehavior.Cascade); 
+
+       // modelBuilder.Entity<Authority>()
+       //     .HasOne(a => a.Role)
+       //     .WithMany(r => r.Authorities)
+       //     .HasForeignKey(a => a.RoleId);
 
         OnModelCreatingPartial(modelBuilder);
     }

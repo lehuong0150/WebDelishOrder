@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -7,6 +8,7 @@ using WebDelishOrder.Models;
 
 namespace WebDelishOrder.Controllers
 {
+    [Authorize(Roles = "ROLE_ADMIN")]
     public class HomeController : Controller
     {
         private readonly AppDbContext _context;

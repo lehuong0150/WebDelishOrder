@@ -6,9 +6,12 @@ using Microsoft.EntityFrameworkCore;
 using WebDelishOrder.Models;
 using WebDelishOrder.ViewModels;
 using FirebaseAdmin.Messaging;
+using Microsoft.AspNetCore.Authorization;
 
 namespace WebDelishOrder.Controllers
 {
+    [Authorize(Roles = "ROLE_ADMIN")]
+
     public class OrderController : Controller
     {
         private readonly AppDbContext _context;

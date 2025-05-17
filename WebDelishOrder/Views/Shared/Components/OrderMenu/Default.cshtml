@@ -57,7 +57,7 @@
 				}
 				<br />
 				<strong>Trạng thái thanh toán: </strong>
-				@if (item.PaymentStatus == "Đã thanh toán" || item.PaymentMethod == "MoMo" || item.PaymentMethod == "momo" ||
+				@if (item.PaymentStatus == "Đã thanh toán" ||
 						(item.PaymentMethod == "Tiền mặt" && item.Status == 3))
 				{
 					@:Đã thanh toán

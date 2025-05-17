@@ -1,28 +1,31 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using DocumentFormat.OpenXml.InkML;
+using FirebaseAdmin.Messaging;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using WebDelishOrder.Models;
 using WebDelishOrder.ViewModels;
+using FirebaseAdmin.Messaging;
 
 namespace WebDelishOrder.Controllers
 {
     public class OrderController : Controller
     {
         private readonly AppDbContext _context;
-       
+
         // Constructor to initialize the DbContext
         public OrderController(AppDbContext context)
         {
             _context = context;
         }
 
-   
+
         // Display the list of orders with pagination and search functionality
         public IActionResult Index(int page = 1, string searchTerm = "", string status = "all", string sort = "desc")
         {
             ViewData["ActivePage"] = "UpdateStatus";
             ViewData["PageTitle"] = "Cập nhật đơn hàng";
-            int pageSize = 6; // Number of orders per page
+            int pageSize = 10; // Number of orders per page
 
             // Truy vấn Orders trước
             var ordersQuery = _context.Orders.AsQueryable();
@@ -32,7 +35,7 @@ namespace WebDelishOrder.Controllers
             {
                 ordersQuery = ordersQuery.Where(o =>
                     (o.ShippingAddress != null && o.ShippingAddress.Contains(searchTerm)) ||
-                    (o.AccountEmail != null && o.AccountEmail.Contains(searchTerm))|| 
+                    (o.AccountEmail != null && o.AccountEmail.Contains(searchTerm)) ||
                     (o.Phone != null && o.Phone.Contains(searchTerm)));
             }
 
@@ -112,7 +115,7 @@ namespace WebDelishOrder.Controllers
             try
             {
                 Console.WriteLine($"LoadMenu called with searchTerm: {searchTerm}, pageIndex: {pageIndex}");
-                return await Task.FromResult(ViewComponent("OrderMenu", new { searchTerm = searchTerm, status = status, sort= sort, pageIndex = pageIndex }));
+                return await Task.FromResult(ViewComponent("OrderMenu", new { searchTerm = searchTerm, status = status, sort = sort, pageIndex = pageIndex }));
             }
             catch (Exception ex)
             {
@@ -125,7 +128,7 @@ namespace WebDelishOrder.Controllers
         [HttpGet]
         public IActionResult GetTotalPages(string searchTerm = "", string status = "all", string sort = "desc")
         {
-            int pageSize = 6; // Number of orders per page
+            int pageSize = 10; // Number of orders per page
 
             var query = _context.Orders.AsQueryable();
 
@@ -133,7 +136,7 @@ namespace WebDelishOrder.Controllers
             {
                 query = query.Where(o =>
                     (o.ShippingAddress != null && o.ShippingAddress.Contains(searchTerm)) ||
-                    (o.AccountEmail != null && o.AccountEmail.Contains(searchTerm))||
+                    (o.AccountEmail != null && o.AccountEmail.Contains(searchTerm)) ||
                     (o.Phone != null && o.Phone.Contains(searchTerm)));
             }
             // Apply status filter
@@ -185,6 +188,41 @@ namespace WebDelishOrder.Controllers
             _context.SaveChanges();
 
             TempData["SuccessMessage"] = "Order updated successfully.";
+
+            // Gửi thông báo qua Firebase Cloud Messaging (FCM)
+            var customer = _context.Accounts.FirstOrDefault(a => a.Email == order.AccountEmail);
+            Console.WriteLine("Customer Firebase Token: " + customer.FirebaseToken);
+            Console.WriteLine("Email: " + order.AccountEmail);
+            if (customer != null && !string.IsNullOrEmpty(customer.FirebaseToken))
+            {
+                var message = new FirebaseAdmin.Messaging.Message()
+                {
+                    Notification = new FirebaseAdmin.Messaging.Notification()
+                    {
+                        Title = "Cập nhật trạng thái đơn hàng",
+                        Body = $"Đơn hàng #{order.Id} đã được cập nhật trạng thái mới: {GetOrderStatusText(order.Status)}"
+                    },
+                    Data = new Dictionary<string, string>()
+                    {
+                        { "title", "Cập nhật trạng thái đơn hàng" },
+                        { "body", $"Đơn hàng #{order.Id} đã được cập nhật trạng thái mới: {GetOrderStatusText(order.Status)}" },
+                        { "orderId", order.Id.ToString() },
+                        { "status", order.Status.ToString() }
+                    },
+                    Token = customer.FirebaseToken
+                };
+
+                try
+                {
+                    string response = FirebaseAdmin.Messaging.FirebaseMessaging.DefaultInstance.SendAsync(message).Result;
+                    Console.WriteLine("Successfully sent FCM message: " + response);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error sending FCM message: " + ex.Message);
+                }
+            }
+
 
             // Get the referrer (the page that submitted the form)
             string referrer = Request.Headers["Referer"].ToString();
@@ -261,49 +299,6 @@ namespace WebDelishOrder.Controllers
             return View("Invoice", order);
         }
 
-
-        // Sửa lại phương thức CreateOrder để thêm thông báo
-        [HttpPost("orders")]
-        public async Task<IActionResult> CreateOrder([FromBody] Order order)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            // Gán thời gian nếu client không gửi lên
-            if (order.RegTime == null)
-            {
-                order.RegTime = DateTime.Now;
-            }
-
-            // Kiểm tra đơn hàng có chi tiết hay không
-            if (order.OrderDetails == null || order.OrderDetails.Count == 0)
-            {
-                return BadRequest("Đơn hàng phải có ít nhất 1 món.");
-            }
-
-            try
-            {
-                _context.Orders.Add(order);
-                _context.SaveChanges();
-
-                // Tạo thông báo khi có đơn hàng mới
-                string customerName = await _context.Accounts
-                    .Where(a => a.Email == order.AccountEmail)
-                    .Select(a => a.Fullname)
-                    .FirstOrDefaultAsync() ?? "Khách hàng";
-
-                string notificationDetails = $"Đơn hàng mới #{order.Id} từ {customerName}, giá trị {order.TotalPrice:N0} VNĐ";
-                //await _notificationService.AddNotification(order.Id, notificationDetails);
-
-                return Ok(order);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, "Lỗi server: " + ex.Message);
-            }
-        }
 
 
         // Action Details trong OrderController
@@ -397,6 +392,18 @@ namespace WebDelishOrder.Controllers
 
             return View(viewModel);
         }
+        private string GetOrderStatusText(int? status)
+        {
+            return status switch
+            {
+                0 => "Chờ xác nhận",
+                1 => "Đang chuẩn bị",
+                2 => "Đang giao",
+                3 => "Đã giao",
+                4 => "Đã hủy",
 
+            };
+        }
     }
+
 }

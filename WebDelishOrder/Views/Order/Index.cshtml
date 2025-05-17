@@ -300,8 +300,6 @@
 			// Convert paymentStatus to "chưa thanh toán" if it is "pending"
 			  if (
 					paymentStatus === "Đã thanh toán"||
-					// Trường hợp 1: Thanh toán bằng MoMo
-					 paymentMethod === "MoMo" || paymentMethod === "momo" ||
 					 // Trường hợp 2: Thanh toán tiền mặt và đơn hàng đã giao hàng (status = 3)
 					(paymentMethod === "Tiền mặt" && status === '3')) {
 				$('#orderPaymentStatus').val("Đã thanh toán");

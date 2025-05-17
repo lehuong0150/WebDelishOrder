@@ -10,6 +10,7 @@ public partial class Account
     public string Password { get; set; } = null!;
 
     public string? Fullname { get; set; }
+    public string? FirebaseToken { get; set; } // Thêm thuộc tính này
 
     public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
 

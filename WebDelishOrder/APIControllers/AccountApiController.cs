@@ -128,4 +128,19 @@ public class AccountApiController : ControllerBase
     {
         return _context.Accounts.Any(e => e.Email == email);
     }
+
+    [HttpPost("updateFirebaseToken")]
+    public IActionResult UpdateFirebaseToken([FromBody] UpdateTokenRequest request)
+    {
+        var customer = _context.Accounts.FirstOrDefault(a => a.Email == request.Email);
+        if (customer == null)
+        {
+            return NotFound("Customer not found.");
+        }
+
+        customer.FirebaseToken = request.Token;
+        _context.SaveChanges();
+
+        return Ok("Firebase token updated successfully.");
+    }
 }

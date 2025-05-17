@@ -38,7 +38,8 @@
 										<div class="form-group">
 											<label>Ảnh danh mục: </label>
 											<input type="file" name="ImageFile" class="form-control" />
-
+											<label style="margin-top:10px;">Hoặc dán link ảnh (URL):</label>
+											<input type="text" name="ImageUrl" class="form-control" value="@Model.NewCategory.ImageCategory" placeholder="https://..." />
 											@if (!string.IsNullOrEmpty(Model.NewCategory.ImageCategory))
 											{
 												<div style="margin-top:10px;">
@@ -52,7 +53,7 @@
 
 										<div class="form-group form-check">
 											@Html.CheckBoxFor(m => m.NewCategory.IsAvailable, new { @class = "form-check-input" })
-											<label class="form-check-label">Is Active</label>
+											<label class="form-check-label">Trạng thái</label>
 										</div>
 
 										<button type="submit" class="btn btn-primary">
@@ -80,7 +81,7 @@
 											<tr>
 												<th>Tên </th>
 												<th>Ảnh</th>
-												<th>Is Active</th>
+												<th>Trạng thái</th>
 												<th>Ngày tạo</th>
 												<th>Tùy chọn</th>
 											</tr>

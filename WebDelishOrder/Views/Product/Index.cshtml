@@ -1,7 +1,7 @@
 ﻿@model WebDelishOrder.ViewModels.ProductViewModel
 
 @{
-    ViewData["PageTitle"] = "Menu";
+    ViewData["PageTitle"] = "Danh sách món ăn";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 <body>
@@ -77,7 +77,7 @@
                                         <div class="col-sm-10 offset-sm-2">
                                             <div class="form-check">
                                                 @Html.CheckBoxFor(m => m.NewProduct.IsAvailable, new { @class = "form-check-input", id = "isAvailable" })
-                                                <label class="form-check-label" for="isAvailable">Is Active</label>
+                                                    <label class="form-check-label" for="isAvailable">Trạng thái</label>
                                             </div>
                                         </div>
                                     </div>
@@ -111,7 +111,7 @@
                                             <th>Giá</th>
                                             <th>Số lượng</th>
                                             <th>Danh mục</th>
-                                            <th>Is Active</th>
+                                            <th>Trạng thái</th>
                                         </tr>
                                     </thead>
                                     <tbody id="productList">

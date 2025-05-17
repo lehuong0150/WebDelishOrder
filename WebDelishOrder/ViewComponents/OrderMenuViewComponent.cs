@@ -15,7 +15,7 @@ namespace WebDelishOrder.ViewComponents
 
         public async Task<IViewComponentResult> InvokeAsync(string searchTerm, string status = "all", string sort = "desc", int pageIndex = 1)
         {
-            int pageSize = 6;
+            int pageSize = 10;
             var query = _context.Orders
                 .Include(o => o.OrderDetails)
                 .ThenInclude(od => od.Product)

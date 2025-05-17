@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
+using FirebaseAdmin.Messaging;
 
 
 [ApiController]
@@ -235,9 +236,8 @@ public class OrderApiController : ControllerBase
         return Ok(pendingOrders);
     }
 
-    //Tao don hang
     [HttpPost("orders")]
-    public IActionResult CreateOrder([FromBody] Order order)
+    public async Task<IActionResult> CreateOrder([FromBody] Order order, [FromServices] IHubContext<OrderHub> hubContext)
     {
         if (!ModelState.IsValid)
         {
@@ -250,6 +250,12 @@ public class OrderApiController : ControllerBase
             order.RegTime = DateTime.Now;
         }
 
+        // Kiểm tra và chuyển đổi OrderDetails thành mảng nếu cần
+        if (order.OrderDetails is not null && order.OrderDetails.GetType() == typeof(OrderDetail))
+        {
+            order.OrderDetails = new List<OrderDetail> { (OrderDetail)order.OrderDetails };
+        }
+
         // Kiểm tra đơn hàng có chi tiết hay không
         if (order.OrderDetails == null || order.OrderDetails.Count == 0)
         {
@@ -258,16 +264,59 @@ public class OrderApiController : ControllerBase
 
         try
         {
+            // Lưu đơn hàng vào cơ sở dữ liệu
             _context.Orders.Add(order);
-            _context.SaveChanges();
-            return Ok(order);
+            await _context.SaveChangesAsync();
+
+                // Gửi thông báo qua SignalR
+                await hubContext.Clients.All.SendAsync("ReceiveNewOrder", order.Id.ToString());
+
+                // Lấy thông tin khách hàng từ cơ sở dữ liệu
+                var customer = await _context.Accounts
+                    .Where(a => a.Email == order.AccountEmail)
+                    .FirstOrDefaultAsync();
+
+                string customerName = customer?.Fullname ?? "Khách hàng";
+                string userToken = customer?.FirebaseToken;
+
+                // Gửi thông báo qua Firebase Cloud Messaging (FCM)
+                if (!string.IsNullOrEmpty(userToken))
+                {
+                    var message = new FirebaseAdmin.Messaging.Message()
+                    {
+                        Notification = new Notification()
+                        {
+                            Title = "Đơn hàng mới!",
+                            Body = $"Đơn hàng #{order.Id} từ {customerName}, giá trị {order.TotalPrice:N0} VNĐ"
+                        },
+                        Token = userToken
+                    };
+
+                    try
+                    {
+                        string response = await FirebaseMessaging.DefaultInstance.SendAsync(message);
+                        Console.WriteLine("Successfully sent FCM message: " + response);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("Error sending FCM message: " + ex.Message);
+                    }
+                }
+          
+
+                return Ok(order);
+            
         }
         catch (Exception ex)
         {
-            return StatusCode(500, "Lỗi server: " + ex.Message);
+            var errorMessage = ex.Message;
+            if (ex.InnerException != null)
+            {
+                errorMessage += " | Inner: " + ex.InnerException.Message;
+            }
+            return StatusCode(500, "Lỗi server: " + errorMessage);
         }
     }
-
 
 
     // Thêm endpoint lọc theo ngày
@@ -473,7 +522,54 @@ public class OrderApiController : ControllerBase
 
         return Ok(isCommented);
     }
+    [HttpPost("{orderId}/payment-complete")]
+    public async Task<IActionResult> UpdatePaymentStatus(int orderId, [FromServices] IHubContext<OrderHub> hubContext)
+    {
+        var order = await _context.Orders.FindAsync(orderId);
+        if (order == null)
+        {
+            return NotFound($"Không tìm thấy đơn hàng với ID {orderId}");
+        }
 
+        // Cập nhật trạng thái thanh toán
+        order.PaymentStatus = "Đã thanh toán";
+        await _context.SaveChangesAsync();
+
+        // Gửi thông báo qua SignalR
+        await hubContext.Clients.All.SendAsync("ReceiveNewOrder", order.Id.ToString());
+
+        // Lấy thông tin khách hàng và gửi FCM
+        var customer = await _context.Accounts
+            .Where(a => a.Email == order.AccountEmail)
+            .FirstOrDefaultAsync();
+        string customerName = customer?.Fullname ?? "Khách hàng";
+        string userToken = customer?.FirebaseToken;
+
+        if (!string.IsNullOrEmpty(userToken))
+        {
+            var message = new FirebaseAdmin.Messaging.Message()
+            {
+                Notification = new Notification()
+                {
+                    Title = "Thanh toán thành công!",
+                    Body = $"Đơn hàng #{order.Id} đã được thanh toán thành công"
+                },
+                Token = userToken
+            };
+
+            try
+            {
+                string response = await FirebaseMessaging.DefaultInstance.SendAsync(message);
+                Console.WriteLine("Successfully sent FCM message: " + response);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error sending FCM message: " + ex.Message);
+            }
+        }
+
+        return Ok(new { message = "Cập nhật trạng thái thanh toán thành công" });
+    }
 
 }
 

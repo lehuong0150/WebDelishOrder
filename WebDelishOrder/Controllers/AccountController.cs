@@ -3,9 +3,12 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using WebDelishOrder.Models;
 using Microsoft.EntityFrameworkCore;
+using NuGet.Configuration;
+using Microsoft.AspNetCore.Authorization;
 
 namespace WebDelishOrder.Controllers
 {
+   // [Authorize(Roles = "ROLE_ADMIN")]
     public class AccountController : Controller
     {
         private readonly AppDbContext _context;
@@ -37,7 +40,8 @@ namespace WebDelishOrder.Controllers
                     // Nếu thông tin đăng nhập đúng, tạo Claim và đăng nhập
                     var claims = new List<Claim>
                 {
-                    new Claim(ClaimTypes.Name, model.Email)
+                    new Claim(ClaimTypes.Name, model.Email),
+                    //new Claim(ClaimTypes., authority.Role.Name)
                 };
 
                     var identity = new ClaimsIdentity(claims, "CookieAuth");
@@ -67,6 +71,20 @@ namespace WebDelishOrder.Controllers
         public IActionResult AccessDenied()
         {
             return View();
+        }
+        [HttpPost("save-firebase-token")]
+        public IActionResult SaveFirebaseToken(string email, string token)
+        {
+            var account = _context.Accounts.FirstOrDefault(a => a.Email == email);
+            if (account == null)
+            {
+                return NotFound("Tài khoản không tồn tại.");
+            }
+
+            account.FirebaseToken = token;
+            _context.SaveChanges();
+
+            return Ok("Token đã được lưu thành công.");
         }
     }
 

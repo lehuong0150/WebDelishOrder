@@ -1,51 +1,52 @@
-﻿// Kết nối đến SignalR Hub
+﻿
 const connection = new signalR.HubConnectionBuilder()
-    .withUrl("/notificationHub")
-    .withAutomaticReconnect()
-    .build();
+        .withUrl("/orderHub")
+        .build();
 
-// Bắt đầu kết nối
-connection.start().then(function () {
-    console.log("SignalR Connected!");
+    let soundEnabled = true;
+    const notificationSound = new Audio("~/assets/sounds/notification.mp3");
 
-    // Đăng ký người dùng hiện tại với hub
-    if (currentUserId) {
-        connection.invoke("RegisterUser", currentUserId);
+    // Toggle sound
+    function toggleSound() {
+        soundEnabled = !soundEnabled;
+        alert(soundEnabled ? "Âm thanh đã bật" : "Âm thanh đã tắt");
     }
 
-    // Nếu là admin, tham gia vào nhóm admin
-    if (isAdmin) {
-        connection.invoke("JoinGroup", "Admins");
-    }
+    // Handle new order notifications
+    connection.on("ReceiveNewOrder", function (orderId) {
+        // Update badge
+        const badge = document.getElementById("newOrderBadge");
+        badge.textContent = parseInt(badge.textContent) + 1;
 
-}).catch(function (err) {
-    console.error(err.toString());
-});
+        // Show notification bell
+        const notificationBell = document.getElementById("notificationBell");
+        notificationBell.classList.add("active");
 
-// Xử lý khi nhận được thông báo đơn hàng mới
-connection.on("ReceiveNewOrder", function (orderId, orderDetails) {
-    // Hiển thị badge thông báo mới
-    updateNotificationBadge();
+        // Play sound
+        if (soundEnabled) {
+            notificationSound.play();
+        }
 
-    // Phát âm thanh nếu tính năng được bật
-    if (soundEnabled) {
-        playNotificationSound();
-    }
+        // Show toast notification
+        const toast = document.createElement("div");
+        toast.className = "toast-notification";
+        toast.innerHTML = `Đơn hàng mới: <strong>${orderId}</strong>`;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 5000);
+    });
 
-    // Hiển thị thông báo ở góc màn hình
-    showToastNotification(`Đơn hàng mới #${orderId}`, orderDetails);
-});
+    // Handle order status change notifications
+    connection.on("ReceiveOrderStatusChange", function (orderId, status) {
+        alert(`Trạng thái đơn hàng ${orderId} đã thay đổi thành: ${status}`);
+    });
 
-// Xử lý khi nhận thông báo chung
-connection.on("ReceiveNotification", function (title, message, type) {
-    showToastNotification(title, message, type);
-});
+    // Start SignalR connection
+    connection.start().catch(function (err) {
+        console.error(err.toString());
+    });
 
-// Xử lý khi trạng thái đơn hàng thay đổi
-connection.on("OrderStatusChanged", function (orderId, newStatus) {
-    // Cập nhật UI nếu đơn hàng hiện đang được hiển thị
-    updateOrderStatusInUI(orderId, newStatus);
+    // Auto-refresh page every 1-5 minutes
+    setInterval(() => {
+        location.reload();
+    }, 300000); // 5 minutes
 
-    // Hiển thị thông báo
-    showToastNotification("Cập nhật đơn hàng", `Đơn hàng #${orderId} đã chuyển sang trạng thái: ${newStatus}`);
-});

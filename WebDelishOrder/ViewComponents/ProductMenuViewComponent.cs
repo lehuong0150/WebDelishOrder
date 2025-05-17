@@ -13,7 +13,7 @@ public class ProductMenuViewComponent : ViewComponent
 
     public async Task<IViewComponentResult> InvokeAsync(string searchTerm, int pageIndex)
     {
-        int pageSize = 6;
+        int pageSize = 10;
         var products = _context.Products
             .Include(p => p.Category)
             .Where(p => string.IsNullOrEmpty(searchTerm) || p.Name.Contains(searchTerm))

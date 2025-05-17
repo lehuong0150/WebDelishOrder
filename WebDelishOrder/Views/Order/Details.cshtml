@@ -171,52 +171,15 @@
                                     <div class="form-group row mb-3">
                                         <label class="col-sm-4 col-form-label">Trạng thái đơn hàng:</label>
                                         <div class="col-sm-8">
-                                            <select class="form-select" name="Status">
-                                                @if (Model.Order.Status == 0)
-                                                {
-                                                    <option value="0" selected>Chờ xác nhận</option>
-                                                }
-                                                else
-                                                {
-                                                    <option value="0">Chờ xác nhận</option>
-                                                }
-
-                                                @if (Model.Order.Status == 1)
-                                                {
-                                                    <option value="1" selected>Đang chuẩn bị</option>
-                                                }
-                                                else
-                                                {
-                                                    <option value="1">Đang chuẩn bị</option>
-                                                }
-
-                                                @if (Model.Order.Status == 2)
-                                                {
-                                                    <option value="2" selected>Đang giao hàng</option>
-                                                }
-                                                else
-                                                {
-                                                    <option value="2">Đang giao hàng</option>
-                                                }
-
-                                                @if (Model.Order.Status == 3)
-                                                {
-                                                    <option value="3" selected>Đã giao hàng</option>
-                                                }
-                                                else
-                                                {
-                                                    <option value="3">Đã giao hàng</option>
-                                                }
-
-                                                @if (Model.Order.Status == 4)
-                                                {
-                                                    <option value="4" selected>Đã hủy</option>
-                                                }
-                                                else
-                                                {
-                                                    <option value="4">Đã hủy</option>
-                                                }
+                                            <label for="Status" class="form-label fw-bold">
+                                                <i class="bi bi-clipboard-check text-primary"></i> Cập nhật trạng thái
+                                            </label>
+                                            <select class="form-select border-primary" name="Status" id="orderStatus" required>
+                                                <!-- Sẽ được cập nhật bởi JavaScript -->
                                             </select>
+                                            <div id="statusChangeDisabled" class="text-danger mt-2" style="display: none;">
+                                                <i class="bi bi-exclamation-triangle"></i> Đơn hàng này không thể chuyển sang trạng thái khác.
+                                            </div>
                                         </div>
                                     </div>
 
@@ -242,28 +205,13 @@
                                     </div>
 
                                     <div class="form-group row mb-3">
-                                        <label class="col-sm-4 col-form-label">Trạng thái thanh toán:</label>
-                                        <div class="col-sm-8">
-                                            <select class="form-select" name="PaymentStatus">
-                                                @if (Model.Order.PaymentStatus == "pending")
-                                                {
-                                                    <option value="pending" selected>Chưa thanh toán</option>
-                                                }
-                                                else
-                                                {
-                                                    <option value="pending">Chưa thanh toán</option>
-                                                }
-
-                                                @if (Model.Order.PaymentStatus == "paid")
-                                                {
-                                                    <option value="paid" selected>Đã thanh toán</option>
-                                                }
-                                                else
-                                                {
-                                                    <option value="paid">Đã thanh toán</option>
-                                                }
-                                            </select>
-                                        </div>
+                                        <label for="PaymentStatus" class="form-label fw-bold">
+                                            <i class="bi bi-cash-coin text-info"></i> Trạng thái thanh toán
+                                        </label>
+                                        <select class="form-select border-info" name="PaymentStatus" id="orderPaymentStatus" required>
+                                            <option value="Đã thanh toán">Đã thanh toán</option>
+                                            <option value="Chưa thanh toán">Chưa thanh toán</option>
+                                        </select>
                                     </div>
 
                                     <div class="form-group row">
@@ -338,9 +286,79 @@
 
 @section Scripts {
     <script>
+                // Định nghĩa tên trạng thái
+        const statusName = {
+            '0': 'Chờ xác nhận',
+            '1': 'Đang chuẩn bị',
+            '2': 'Đang giao hàng',
+            '3': 'Đã giao hàng',
+            '4': 'Đã hủy'
+        };
+
+        // Định nghĩa quy tắc chuyển trạng thái
+        const statusTransitions = {
+            '0': ['0', '1', '4'],      // Chờ xác nhận -> (Giữ nguyên, Đang chuẩn bị, Đã hủy)
+            '1': ['1', '2', '4'],      // Đang chuẩn bị -> (Giữ nguyên, Đang giao hàng, Đã hủy)
+            '2': ['2', '3'],           // Đang giao hàng -> (Giữ nguyên, Đã giao hàng)
+            '3': ['3'],                // Đã giao hàng -> (Không thể chuyển đổi)
+            '4': ['4']                 // Đã hủy -> (Không thể chuyển đổi)
+        };
+
+        // CSS classes cho các trạng thái
+        const statusColors = {
+            '0': 'bg-warning text-dark',
+            '1': 'bg-info text-white',
+            '2': 'bg-primary text-white',
+            '3': 'bg-success text-white',
+            '4': 'bg-danger text-white'
+        };
+
+        // Cập nhật dropdown status theo quy tắc chuyển trạng thái
+        function updateStatusDropdown(currentStatus) {
+            // Xóa tất cả options hiện tại
+            $('#orderStatus').empty();
+
+            // Đảm bảo status là số nguyên
+            currentStatus = parseInt(currentStatus);
+
+            // Lấy các trạng thái được phép chuyển đổi
+            const allowedStatuses = statusTransitions[currentStatus] || [];
+
+            // Kiểm tra nếu chỉ có 1 trạng thái và là trạng thái hiện tại
+            if (allowedStatuses.length === 1 && allowedStatuses[0] === currentStatus.toString()) {
+                $('#statusChangeDisabled').show();
+            } else {
+                $('#statusChangeDisabled').hide();
+            }
+
+            // Thêm các options được phép
+            allowedStatuses.forEach(status => {
+                $('#orderStatus').append($('<option>', {
+                    value: status,
+                    text: statusName[status]
+                }));
+            });
+
+            // Chọn trạng thái hiện tại
+            $('#orderStatus').val(currentStatus);
+        }
+
+        // Cập nhật trạng thái thanh toán dựa trên phương thức thanh toán và trạng thái đơn hàng
+        function updatePaymentStatus(paymentMethod, orderStatus, currentPaymentStatus) {
+            // Nếu đơn hàng đã giao hàng (status = 3) và phương thức thanh toán là tiền mặt,
+            // hoặc payment status hiện tại đã là "paid", thì đánh dấu là đã thanh toán
+            if (orderStatus === '3' && paymentMethod === 'Cash') {
+                $('#orderPaymentStatus').val("Đã thanh toán");
+            } else {
+                // Giữ nguyên giá trị hiện tại
+                $('#orderPaymentStatus').val(currentPaymentStatus);
+            }
+        }
+
+        // Hàm gửi thông báo
         function sendNotification(orderId) {
             $.ajax({
-                url: '@Url.Action("SendNotification", "Order")',
+                url: '/Order/SendNotification',
                 type: 'POST',
                 data: { id: orderId },
                 success: function(result) {
@@ -352,8 +370,28 @@
             });
         }
 
-        // Thêm CSS để tùy chỉnh timeline
         $(document).ready(function() {
+            // Lấy giá trị ban đầu
+            const currentStatus = '@Model.Order.Status';
+            const paymentMethod = '@Model.Order.PaymentMethod';
+            const currentPaymentStatus = '@Model.Order.PaymentStatus' === 'Chưa thanh toán' ? 'Chưa thanh toán' : 'Đã thanh toán';
+
+            // Khởi tạo dropdown trạng thái đơn hàng
+            updateStatusDropdown(currentStatus);
+
+            // Khởi tạo dropdown trạng thái thanh toán
+            updatePaymentStatus(paymentMethod, currentStatus, currentPaymentStatus);
+
+            // Xử lý sự kiện khi thay đổi trạng thái đơn hàng
+            $('#orderStatus').change(function() {
+                const newStatus = $(this).val();
+                // Nếu chuyển sang trạng thái "Đã giao hàng" và phương thức thanh toán là tiền mặt
+                if (newStatus === '3' && paymentMethod === 'Cash') {
+                    $('#orderPaymentStatus').val('Đã thanh toán');
+                }
+            });
+
+            // Thêm CSS để tùy chỉnh timeline
             $("<style>")
                 .prop("type", "text/css")
                 .html(`

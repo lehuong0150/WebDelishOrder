@@ -20,7 +20,7 @@ namespace WebDelishOrder.ViewComponents
             {
                 pageIndex = 1;
             }
-            int pageSize = 5;
+            int pageSize = 6;
             var categories = _context.Categories
                 .Where(p => string.IsNullOrEmpty(searchTerm) || p.Name.Contains(searchTerm))
                 .Skip((pageIndex - 1) * pageSize)

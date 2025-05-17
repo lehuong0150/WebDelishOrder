@@ -1,383 +1,205 @@
 ﻿@model WebDelishOrder.ViewModels.ReportViewModel
 @{
-	ViewData["PageTitle"] = "Báo cáo doanh thu";
-	Layout = "_Layout";
+    ViewData["Title"] = "Báo Cáo Doanh Thu";
 }
 
 <div class="container-fluid">
-	<div class="d-flex justify-content-between align-items-center mb-4">
-		<h2>Báo cáo doanh thu</h2>
-		<div>
-			<a href="@Url.Action("ExportToExcel", new { fromDate = Model.FromDate, toDate = Model.ToDate, productCategory = Model.ProductCategory })"
-			   class="btn btn-success me-2">
-				<i class="fas fa-file-excel"></i> Xuất Excel
-			</a>
-			<a href="@Url.Action("Print", new { fromDate = Model.FromDate, toDate = Model.ToDate, productCategory = Model.ProductCategory })"
-			   class="btn btn-secondary" target="_blank">
-				<i class="fas fa-print"></i> In báo cáo
-			</a>
-		</div>
-	</div>
+    <!-- Tiêu đề -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Báo Cáo Doanh Thu</h2>
+        <div>
+            <a href="@Url.Action("ExportToExcel", new { fromDate = Model.FromDate, toDate = Model.ToDate, productCategory = Model.ProductCategory })"
+               class="btn btn-success me-2">
+                <i class="fas fa-file-excel"></i> Xuất Excel
+            </a>
+            <a href="@Url.Action("ExportToPdf", new { fromDate = Model.FromDate, toDate = Model.ToDate, productCategory = Model.ProductCategory })"
+               class="btn btn-danger">
+                <i class="fas fa-file-pdf"></i> Xuất PDF
+            </a>
+        </div>
+    </div>
 
-	<!-- Bộ lọc báo cáo -->
-	<div class="card mb-4">
-		<div class="card-header bg-primary text-white">
-			<h5 class="mb-0">Bộ lọc báo cáo</h5>
-		</div>
-		<div class="card-body">
-			<form id="filterForm" method="get" class="row g-3">
-				<div class="col-md-3">
-					<label for="fromDate" class="form-label">Từ ngày</label>
-					<input type="date" class="form-control" id="fromDate" name="fromDate"
-						   value="@Model.FromDate.ToString("yyyy-MM-dd")">
-				</div>
-				<div class="col-md-3">
-					<label for="toDate" class="form-label">Đến ngày</label>
-					<input type="date" class="form-control" id="toDate" name="toDate"
-						   value="@Model.ToDate.ToString("yyyy-MM-dd")">
-				</div>
-				<div class="col-md-3">
-					<label for="productCategory" class="form-label">Danh mục sản phẩm</label>
-					<select class="form-select" id="productCategory" name="productCategory">
-						<option value="">Tất cả danh mục</option>
-						@foreach (var category in Model.ProductCategories)
-						{
-							if (!string.IsNullOrEmpty(Model.ProductCategory) && category == Model.ProductCategory)
-							{
-								<option value="@category" selected>@category</option>
-							}
-							else
-							{
-								<option value="@category">@category</option>
-							}
-						}
-				</div>
-				<div class="col-md-3 d-flex align-items-end">
-					<button type="submit" class="btn btn-primary me-2">
-						<i class="fas fa-filter"></i> Lọc báo cáo
-					</button>
-					<button type="button" class="btn btn-outline-secondary" onclick="resetFilters()">
-						<i class="fas fa-redo"></i> Đặt lại
-					</button>
-				</div>
-			</form>
-		</div>
-	</div>
+    <!-- Bộ lọc báo cáo -->
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Bộ lọc báo cáo</h5>
+        </div>
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <label for="fromDate" class="form-label">Từ ngày</label>
+                    <input type="date" class="form-control" id="fromDate" name="fromDate" value="@Model.FromDate.ToString("yyyy-MM-dd")">
+                </div>
+                <div class="col-md-4">
+                    <label for="toDate" class="form-label">Đến ngày</label>
+                    <input type="date" class="form-control" id="toDate" name="toDate" value="@Model.ToDate.ToString("yyyy-MM-dd")">
+                </div>
+                <div class="col-md-4">
+                    <label for="productCategory" class="form-label">Danh mục sản phẩm</label>
+                    <select class="form-select" id="productCategory" name="productCategory">
+                        <option value="">Tất cả danh mục</option>
+                        @foreach (var category in Model.ProductCategories)
+                        {
+                            if (category == Model.ProductCategory)
+                            {
+                                <option value="@category" selected>@category</option>
+                            }
+                            else
+                            {
+                                <option value="@category">@category</option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="col-md-12 d-flex justify-content-end">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-filter"></i> Lọc Báo Cáo
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-	<!-- Thống kê tổng quan -->
-	<div class="row mb-4">
-		<div class="col-md-4">
-			<div class="card bg-primary text-white h-100">
-				<div class="card-body">
-					<div class="d-flex justify-content-between align-items-center">
-						<div>
-							<h6 class="card-title">Tổng doanh thu</h6>
-							<h3 class="card-text">@Model.TotalRevenue.ToString("#,##0") đ</h3>
-						</div>
-						<i class="fas fa-money-bill-wave fa-3x opacity-50"></i>
-					</div>
-				</div>
-			</div>
-		</div>
-		<div class="col-md-4">
-			<div class="card bg-success text-white h-100">
-				<div class="card-body">
-					<div class="d-flex justify-content-between align-items-center">
-						<div>
-							<h6 class="card-title">Tổng đơn hàng</h6>
-							<h3 class="card-text">@Model.TotalOrders</h3>
-						</div>
-						<i class="fas fa-shopping-cart fa-3x opacity-50"></i>
-					</div>
-				</div>
-			</div>
-		</div>
-		<div class="col-md-4">
-			<div class="card bg-info text-white h-100">
-				<div class="card-body">
-					<div class="d-flex justify-content-between align-items-center">
-						<div>
-							<h6 class="card-title">Đơn hàng trung bình</h6>
-							<h3 class="card-text">
-								@(Model.TotalOrders > 0
-															? (Model.TotalRevenue / Model.TotalOrders).ToString("#,##0")
-															: "0") đ
-							</h3>
-						</div>
-						<i class="fas fa-chart-line fa-3x opacity-50"></i>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
+    <!-- Thống kê tổng quan -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h5>Tổng doanh thu</h5>
+                    <h3>@Model.TotalRevenue.ToString("#,##0") VNĐ</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h5>Tổng đơn hàng</h5>
+                    <h3>@Model.TotalOrders</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h5>Đơn hàng trung bình</h5>
+                    <h3>@(Model.TotalOrders > 0 ? (Model.TotalRevenue / Model.TotalOrders).ToString("#,##0") : "0") VNĐ</h3>
+                </div>
+            </div>
+        </div>
+    </div>
 
-	<!-- Biểu đồ chỉ hiển thị khi có dữ liệu -->
-	@if (Model.RevenueData.Any())
-	{
-		<div class="row mb-4">
-			<div class="col-md-7">
-				<div class="card h-100">
-					<div class="card-header d-flex justify-content-between align-items-center">
-						<h5 class="mb-0">Doanh thu theo ngày</h5>
-						<div class="btn-group btn-group-sm" role="group">
-							<button type="button" class="btn btn-outline-secondary" onclick="toggleChartType('daily', 'line')">
-								<i class="fas fa-chart-line"></i>
-							</button>
-							<button type="button" class="btn btn-outline-secondary" onclick="toggleChartType('daily', 'bar')">
-								<i class="fas fa-chart-bar"></i>
-							</button>
-						</div>
-					</div>
-					<div class="card-body">
-						<canvas id="dailyRevenueChart" style="width: 100%; height: 300px;"></canvas>
-					</div>
-				</div>
-			</div>
-			<div class="col-md-5">
-				<div class="card h-100">
-					<div class="card-header d-flex justify-content-between align-items-center">
-						<h5 class="mb-0">Doanh thu theo danh mục</h5>
-						<div class="btn-group btn-group-sm" role="group">
-							<button type="button" class="btn btn-outline-secondary" onclick="toggleChartType('category', 'pie')">
-								<i class="fas fa-chart-pie"></i>
-							</button>
-							<button type="button" class="btn btn-outline-secondary" onclick="toggleChartType('category', 'doughnut')">
-								<i class="fas fa-chart-pie"></i>
-							</button>
-						</div>
-					</div>
-					<div class="card-body">
-						<canvas id="categoryRevenueChart" style="width: 100%; height: 300px;"></canvas>
-					</div>
-				</div>
-			</div>
-		</div>
-	}
+    <!-- Biểu đồ -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Doanh thu theo ngày</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="dailyRevenueChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Doanh thu theo danh mục</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="categoryRevenueChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
 
-	<!-- Bảng dữ liệu chi tiết -->
-	<div class="card">
-		<div class="card-header bg-primary text-white">
-			<h5 class="mb-0">Chi tiết doanh thu</h5>
-		</div>
-		<div class="card-body">
-			@if (Model.RevenueData.Any())
-			{
-				<div class="table-responsive">
-					<table class="table table-striped table-hover table-sm">
-						<thead class="table-light">
-							<tr>
-								<th>STT</th>
-								<th>Mã đơn</th>
-								<th>Ngày đặt</th>
-								<th>Khách hàng</th>
-								<th>Sản phẩm</th>
-								<th>Danh mục</th>
-								<th class="text-center">Số lượng</th>
-								<th class="text-end">Đơn giá</th>
-								<th class="text-end">Thành tiền</th>
-							</tr>
-						</thead>
-						<tbody>
-							@{
-								int index = (Model.CurrentPage - 1) * 20;
-							}
-							@foreach (var item in Model.RevenueData)
-							{
-								index++;
-								<tr>
-									<td>@index</td>
-									<td>@item.OrderCode</td>
-									<td>@item.OrderDate.ToString("dd/MM/yyyy")</td>
-									<td>@item.CustomerName</td>
-									<td>@item.ProductName</td>
-									<td>@item.CategoryName</td>
-									<td class="text-center">@item.Quantity</td>
-									<td class="text-end">@item.UnitPrice.ToString("#,##0")</td>
-									<td class="text-end">@item.Amount.ToString("#,##0")</td>
-								</tr>
-							}
-						</tbody>
-						<tfoot>
-							<tr class="table-dark">
-								<td colspan="8" class="text-end fw-bold">Tổng doanh thu:</td>
-								<td class="text-end fw-bold">@Model.TotalRevenue.ToString("#,##0")</td>
-							</tr>
-						</tfoot>
-					</table>
-				</div>
-
-				<!-- Phân trang -->
-				@if (Model.TotalPages > 1)
-				{
-					<nav aria-label="Page navigation" class="mt-4">
-						<ul class="pagination justify-content-center">
-							<li class="page-item @(Model.CurrentPage == 1 ? "disabled" : "")">
-								<a class="page-link" href="@Url.Action("Index", new { fromDate = Model.FromDate, toDate = Model.ToDate, productCategory = Model.ProductCategory, page = Model.CurrentPage - 1 })">
-									<i class="fas fa-chevron-left"></i>
-								</a>
-							</li>
-
-							@for (int i = Math.Max(1, Model.CurrentPage - 2); i <= Math.Min(Model.TotalPages, Model.CurrentPage + 2); i++)
-							{
-								<li class="page-item @(Model.CurrentPage == i ? "active" : "")">
-									<a class="page-link" href="@Url.Action("Index", new { fromDate = Model.FromDate, toDate = Model.ToDate, productCategory = Model.ProductCategory, page = i })">
-										@i
-									</a>
-								</li>
-							}
-
-							<li class="page-item @(Model.CurrentPage == Model.TotalPages ? "disabled" : "")">
-								<a class="page-link" href="@Url.Action("Index", new { fromDate = Model.FromDate, toDate = Model.ToDate, productCategory = Model.ProductCategory, page = Model.CurrentPage + 1 })">
-									<i class="fas fa-chevron-right"></i>
-								</a>
-							</li>
-						</ul>
-					</nav>
-				}
-			}
-			else
-			{
-				<div class="alert alert-info">
-					<i class="fas fa-info-circle me-2"></i> Không có dữ liệu doanh thu trong khoảng thời gian đã chọn.
-				</div>
-			}
-		</div>
-	</div>
+    <!-- Bảng dữ liệu -->
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Chi tiết doanh thu</h5>
+        </div>
+        <div class="card-body">
+            @if (Model.RevenueData != null && Model.RevenueData.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Ngày</th>
+                                <th>Khách hàng</th>
+                                <th>Sản phẩm</th>
+                                <th>Danh mục</th>
+                                <th>Số lượng</th>
+                                <th>Đơn giá</th>
+                                <th>Thành tiền</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.RevenueData)
+                            {
+                                <tr>
+                                    <td>@item.OrderId</td>
+                                    <td>@item.OrderDate.ToString("dd/MM/yyyy")</td>
+                                    <td>@item.CustomerName</td>
+                                    <td>@item.ProductName</td>
+                                    <td>@item.CategoryName</td>
+                                    <td>@item.Quantity</td>
+                                    <td>@item.UnitPrice.ToString("#,##0")</td>
+                                    <td>@item.Amount.ToString("#,##0")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info">Không có dữ liệu để hiển thị.</div>
+            }
+        </div>
+    </div>
 </div>
 
 @section Scripts {
-	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-	<script>
-		document.addEventListener('DOMContentLoaded', function() {
-		@if (Model.RevenueData.Any())
-		{
-			<text>
-					// Biểu đồ doanh thu theo ngày
-					const dailyCtx = document.getElementById('dailyRevenueChart').getContext('2d');
-					let dailyChartType = 'line';
-					let dailyRevenueChart;
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Biểu đồ doanh thu theo ngày
+            const dailyCtx = document.getElementById('dailyRevenueChart').getContext('2d');
+            new Chart(dailyCtx, {
+                type: 'line',
+                data: {
+                    labels: @Html.Raw(Json.Serialize(Model.ChartData.DailyLabels)),
+                    datasets: [{
+                        label: 'Doanh thu (VNĐ)',
+                        data: @Html.Raw(Json.Serialize(Model.ChartData.DailyData)),
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
 
-					function initDailyChart() {
-						if (dailyRevenueChart) {
-							dailyRevenueChart.destroy();
-						}
-
-						dailyRevenueChart = new Chart(dailyCtx, {
-							type: dailyChartType,
-							data: {
-								labels: @Html.Raw(Json.Serialize(Model.ChartData.DailyLabels)),
-								datasets: [{
-									label: 'Doanh thu (VNĐ)',
-									data: @Html.Raw(Json.Serialize(Model.ChartData.DailyData)),
-									backgroundColor: 'rgba(54, 162, 235, 0.2)',
-									borderColor: 'rgba(54, 162, 235, 1)',
-									borderWidth: 1,
-									tension: 0.1
-								}]
-							},
-							options: {
-								responsive: true,
-								maintainAspectRatio: false,
-								scales: {
-									y: {
-										beginAtZero: true,
-										ticks: {
-											callback: function(value) {
-												return new Intl.NumberFormat('vi-VN').format(value);
-											}
-										}
-									}
-								},
-								plugins: {
-									tooltip: {
-										callbacks: {
-											label: function(context) {
-												let label = context.dataset.label || '';
-												let value = context.parsed.y || 0;
-												return label + ': ' + new Intl.NumberFormat('vi-VN').format(value) + ' đ';
-											}
-										}
-									}
-								}
-							}
-						});
-					}
-
-					// Biểu đồ doanh thu theo danh mục
-					const categoryCtx = document.getElementById('categoryRevenueChart').getContext('2d');
-					let categoryChartType = 'pie';
-					let categoryRevenueChart;
-
-					function initCategoryChart() {
-						if (categoryRevenueChart) {
-							categoryRevenueChart.destroy();
-						}
-
-						categoryRevenueChart = new Chart(categoryCtx, {
-							type: categoryChartType,
-							data: {
-								labels: @Html.Raw(Json.Serialize(Model.ChartData.CategoryLabels)),
-								datasets: [{
-									data: @Html.Raw(Json.Serialize(Model.ChartData.CategoryData)),
-									backgroundColor: [
-										'rgba(255, 99, 132, 0.7)',
-										'rgba(54, 162, 235, 0.7)',
-										'rgba(255, 206, 86, 0.7)',
-										'rgba(75, 192, 192, 0.7)',
-										'rgba(153, 102, 255, 0.7)',
-										'rgba(255, 159, 64, 0.7)',
-										'rgba(199, 199, 199, 0.7)',
-										'rgba(83, 102, 255, 0.7)',
-										'rgba(40, 159, 64, 0.7)',
-										'rgba(210, 199, 199, 0.7)'
-									],
-									borderWidth: 1
-								}]
-							},
-							options: {
-								responsive: true,
-								maintainAspectRatio: false,
-								plugins: {
-									tooltip: {
-										callbacks: {
-											label: function(context) {
-												let label = context.label || '';
-												let value = context.raw || 0;
-												const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
-												const percentage = Math.round((value / total) * 100);
-												return label + ': ' + new Intl.NumberFormat('vi-VN').format(value) + ' đ (' + percentage + '%)';
-											}
-										}
-									}
-								}
-							}
-						});
-					}
-
-					// Khởi tạo biểu đồ ban đầu
-					initDailyChart();
-					initCategoryChart();
-
-					// Định nghĩa hàm chuyển đổi loại biểu đồ
-					window.toggleChartType = function(chartId, type) {
-						if (chartId === 'daily') {
-							dailyChartType = type;
-							initDailyChart();
-						} else if (chartId === 'category') {
-							categoryChartType = type;
-							initCategoryChart();
-						}
-					};
-			</text>
-		}
-
-			// Hàm reset bộ lọc
-			window.resetFilters = function() {
-				document.getElementById('fromDate').value = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0];
-				document.getElementById('toDate').value = new Date().toISOString().split('T')[0];
-				document.getElementById('productCategory').value = '';
-				document.getElementById('filterForm').submit();
-			};
-		});
-	</script>
+            // Biểu đồ doanh thu theo danh mục
+            const categoryCtx = document.getElementById('categoryRevenueChart').getContext('2d');
+            new Chart(categoryCtx, {
+                type: 'pie',
+                data: {
+                    labels: @Html.Raw(Json.Serialize(Model.ChartData.CategoryLabels)),
+                    datasets: [{
+                        data: @Html.Raw(Json.Serialize(Model.ChartData.CategoryData)),
+                        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        });
+    </script>
 }

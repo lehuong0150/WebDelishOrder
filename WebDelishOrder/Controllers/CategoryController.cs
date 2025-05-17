@@ -21,7 +21,7 @@ namespace WebDelishOrder.Controllers
             ViewData["ActivePage"] = "Category"; // Giữ nguyên để đánh dấu menu
             ViewData["PageTitle"] = "Danh mục món ăn"; 
 
-            int pageSize = 5;  // Số sản phẩm mỗi trang
+            int pageSize = 6;  // Số sản phẩm mỗi trang
             var query = _context.Categories.AsQueryable();
 
             // Lọc theo từ khóa tìm kiếm
@@ -57,7 +57,7 @@ namespace WebDelishOrder.Controllers
         [HttpGet]
         public IActionResult GetTotalPages(string searchTerm = "")
         {
-            int pageSize = 5; //  Đặt rõ ràng pageSize
+            int pageSize = 6; //  Đặt rõ ràng pageSize
 
             var query = _context.Categories.AsQueryable();
 

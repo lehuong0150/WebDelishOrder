@@ -6,7 +6,7 @@
         <td>@item.Name</td>
         <td><img src="@item.ImageCategory" width="40" height="40" class="rounded-circle" /></td>
         <td>
-            <span class="badge badge-success">@(item.IsAvailable ? "Active" : "Inactive")</span>
+            <span class="badge badge-success">@(item.IsAvailable ? "Có" : "Không")</span>
         </td>
         <td>
             @(item.CreatedAt.HasValue ? item.CreatedAt.Value.ToString("yyyy-MM-dd HH:mm:ss") : "Không có dữ liệu")

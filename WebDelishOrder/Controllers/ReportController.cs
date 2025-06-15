@@ -31,6 +31,8 @@ namespace WebDelishOrder.Controllers
 
         public IActionResult Index(DateTime? fromDate, DateTime? toDate, string productCategory = null)
         {
+            ViewData["ActivePage"] = "SellingReport";
+            ViewData["PageTitle"] = "Báo cáo doanh thu";
             // Default date range: current month
             fromDate ??= new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
             toDate ??= DateTime.Now;
@@ -42,6 +44,7 @@ namespace WebDelishOrder.Controllers
                         join c in _context.Categories on p.CategoryId equals c.Id
                         join m in _context.Customers on o.AccountEmail equals m.AccountEmail
                         where o.RegTime >= fromDate && o.RegTime <= toDate
+                                && o.Status != 4
                               && (string.IsNullOrEmpty(productCategory) || c.Name == productCategory)
                         select new RevenueReportItem
                         {
@@ -118,6 +121,7 @@ namespace WebDelishOrder.Controllers
                         join m in _context.Customers on o.AccountEmail equals m.AccountEmail
                         join c in _context.Categories on p.CategoryId equals c.Id
                         where o.RegTime >= fromDate && o.RegTime <= toDate
+                                && o.Status != 4
                               && (string.IsNullOrEmpty(productCategory) || c.Name == productCategory)
                         select new
                         {
@@ -134,33 +138,89 @@ namespace WebDelishOrder.Controllers
             var data = query.ToList();
             var totalAmount = data.Sum(x => x.Amount);
 
+            // Thêm CSS hỗ trợ Unicode và font
             var htmlContent = $@"
-        <h1>BÁO CÁO DOANH THU</h1>
-        <p><strong>Thời gian:</strong> {fromDate:dd/MM/yyyy} - {toDate:dd/MM/yyyy}</p>
-        <table border='1' cellspacing='0' cellpadding='5'>
-            <thead>
-                <tr>
-                    <th>#</th><th>Mã Đơn</th><th>Ngày Đặt</th><th>Khách Hàng</th>
-                    <th>Sản Phẩm</th><th>Danh Mục</th><th>Số Lượng</th><th>Thành Tiền</th>
-                </tr>
-            </thead>
-            <tbody>";
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='UTF-8'>
+    <style>
+        body {{
+            font-family: 'DejaVu Sans', Arial, sans-serif;
+            font-size: 12px;
+        }}
+        h1 {{
+            text-align: center;
+            color: #333;
+        }}
+        table {{
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }}
+        th, td {{
+            border: 1px solid #333;
+            padding: 8px;
+            text-align: left;
+        }}
+        th {{
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }}
+        .text-right {{
+            text-align: right;
+        }}
+        .total-row {{
+            font-weight: bold;
+            background-color: #f9f9f9;
+        }}
+    </style>
+</head>
+<body>
+    <h1>BÁO CÁO DOANH THU</h1>
+    <p><strong>Thời gian:</strong> {fromDate:dd/MM/yyyy} - {toDate:dd/MM/yyyy}</p>
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Mã Đơn</th>
+                <th>Ngày Đặt</th>
+                <th>Khách Hàng</th>
+                <th>Sản Phẩm</th>
+                <th>Danh Mục</th>
+                <th>Số Lượng</th>
+                <th>Thành Tiền</th>
+            </tr>
+        </thead>
+        <tbody>";
 
             int index = 1;
             foreach (var item in data)
             {
-                htmlContent += $"<tr><td>{index++}</td><td>{item.OrderId}</td><td>{item.OrderDate:dd/MM/yyyy}</td><td>{item.CustomerName}</td><td>{item.ProductName}</td><td>{item.CategoryName}</td><td>{item.Quantity}</td><td>{item.Amount:N0}</td></tr>";
+                htmlContent += $@"
+            <tr>
+                <td>{index++}</td>
+                <td>{item.OrderId}</td>
+                <td>{item.OrderDate:dd/MM/yyyy}</td>
+                <td>{item.CustomerName}</td>
+                <td>{item.ProductName}</td>
+                <td>{item.CategoryName}</td>
+                <td class='text-right'>{item.Quantity}</td>
+                <td class='text-right'>{item.Amount:N0}</td>
+            </tr>";
             }
 
             htmlContent += $@"
-            </tbody>
-            <tfoot>
-                <tr>
-                    <td colspan='7' style='text-align:right'><strong>Tổng Doanh Thu:</strong></td>
-                    <td><strong>{totalAmount:N0}</strong></td>
-                </tr>
-            </tfoot>
-        </table>";
+        </tbody>
+        <tfoot>
+            <tr class='total-row'>
+                <td colspan='7' class='text-right'><strong>Tổng Doanh Thu:</strong></td>
+                <td class='text-right'><strong>{totalAmount:N0} VND</strong></td>
+            </tr>
+        </tfoot>
+    </table>
+</body>
+</html>";
 
             var converter = new SynchronizedConverter(new PdfTools());
             var doc = new HtmlToPdfDocument()
@@ -170,9 +230,16 @@ namespace WebDelishOrder.Controllers
                     ColorMode = DinkToPdf.ColorMode.Color,
                     Orientation = DinkToPdf.Orientation.Portrait,
                     PaperSize = DinkToPdf.PaperKind.A4,
-                    Margins = new MarginSettings { Top = 10 }
+                    Margins = new MarginSettings { Top = 10, Bottom = 10, Left = 10, Right = 10 }
                 },
-                Objects = { new ObjectSettings { HtmlContent = htmlContent } }
+                Objects = {
+            new ObjectSettings {
+                HtmlContent = htmlContent,
+                WebSettings = { DefaultEncoding = "utf-8" },
+                HeaderSettings = { FontSize = 9, Right = "Trang [page] / [toPage]", Line = true },
+                FooterSettings = { FontSize = 9, Line = true, Left = "Xuất ngày: " + DateTime.Now.ToString("dd/MM/yyyy HH:mm") }
+            }
+        }
             };
 
             var pdf = converter.Convert(doc);
@@ -193,6 +260,7 @@ namespace WebDelishOrder.Controllers
                         join c in _context.Categories on p.CategoryId equals c.Id
                         join m in _context.Customers on o.AccountEmail equals m.AccountEmail
                         where o.RegTime >= fromDate && o.RegTime <= toDate
+                                && o.Status != 4
                               && (string.IsNullOrEmpty(productCategory) || c.Name == productCategory)
                         select new
                         {

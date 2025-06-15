@@ -36,7 +36,10 @@
 			}
 		</td>
 		<td>
-			<a href="/Order/PrintInvoice/@item.Id" class="btn btn-primary">In hóa đơn</a>
+			@if (item.Status == 3) // 3 = Đã giao hàng
+			{
+				<a href="/Order/PrintInvoice/@item.Id" class="btn btn-primary">In hóa đơn</a>
+			}
 		</td>
 	</tr>
 	<!-- Dòng chi tiết, mặc định ẩn -->

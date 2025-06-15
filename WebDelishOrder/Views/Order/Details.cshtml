@@ -286,7 +286,7 @@
 
 @section Scripts {
     <script>
-                // Định nghĩa tên trạng thái
+        // Định nghĩa tên trạng thái
         const statusName = {
             '0': 'Chờ xác nhận',
             '1': 'Đang chuẩn bị',
@@ -313,25 +313,24 @@
             '4': 'bg-danger text-white'
         };
 
-        // Cập nhật dropdown status theo quy tắc chuyển trạng thái
-        function updateStatusDropdown(currentStatus) {
-            // Xóa tất cả options hiện tại
+        // Cập nhật dropdown trạng thái đơn hàng
+        function updateStatusDropdown(currentStatus, paymentStatus) {
             $('#orderStatus').empty();
 
-            // Đảm bảo status là số nguyên
-            currentStatus = parseInt(currentStatus);
+            currentStatus = currentStatus.toString();
+            let allowedStatuses = statusTransitions[currentStatus] || [];
 
-            // Lấy các trạng thái được phép chuyển đổi
-            const allowedStatuses = statusTransitions[currentStatus] || [];
+            // Nếu đã thanh toán, loại bỏ trạng thái "Đã hủy" (4)
+            if (paymentStatus === "Đã thanh toán") {
+                allowedStatuses = allowedStatuses.filter(status => status !== '4' && status !== 4);
+            }
 
-            // Kiểm tra nếu chỉ có 1 trạng thái và là trạng thái hiện tại
-            if (allowedStatuses.length === 1 && allowedStatuses[0] === currentStatus.toString()) {
+            if (allowedStatuses.length === 1 && allowedStatuses[0] === currentStatus) {
                 $('#statusChangeDisabled').show();
             } else {
                 $('#statusChangeDisabled').hide();
             }
 
-            // Thêm các options được phép
             allowedStatuses.forEach(status => {
                 $('#orderStatus').append($('<option>', {
                     value: status,
@@ -339,19 +338,37 @@
                 }));
             });
 
-            // Chọn trạng thái hiện tại
             $('#orderStatus').val(currentStatus);
         }
 
-        // Cập nhật trạng thái thanh toán dựa trên phương thức thanh toán và trạng thái đơn hàng
+        // Cập nhật dropdown trạng thái thanh toán
         function updatePaymentStatus(paymentMethod, orderStatus, currentPaymentStatus) {
-            // Nếu đơn hàng đã giao hàng (status = 3) và phương thức thanh toán là tiền mặt,
-            // hoặc payment status hiện tại đã là "paid", thì đánh dấu là đã thanh toán
-            if (orderStatus === '3' && paymentMethod === 'Cash') {
+            $('#orderPaymentStatus').empty();
+
+            // Xác định đã thanh toán chưa
+            let isPaid = currentPaymentStatus === "Đã thanh toán" ||
+                         (paymentMethod === "Tiền mặt" && orderStatus === '3');
+
+            if (isPaid) {
+                // Chỉ cho chọn "Đã thanh toán", không cho chỉnh
+                $('#orderPaymentStatus').append($('<option>', {
+                    value: "Đã thanh toán",
+                    text: "Đã thanh toán"
+                }));
                 $('#orderPaymentStatus').val("Đã thanh toán");
+                $('#orderPaymentStatus').prop('disabled', true);
             } else {
-                // Giữ nguyên giá trị hiện tại
+                // Cho chọn cả hai trạng thái
+                $('#orderPaymentStatus').append($('<option>', {
+                    value: "Chưa thanh toán",
+                    text: "Chưa thanh toán"
+                }));
+                $('#orderPaymentStatus').append($('<option>', {
+                    value: "Đã thanh toán",
+                    text: "Đã thanh toán"
+                }));
                 $('#orderPaymentStatus').val(currentPaymentStatus);
+                $('#orderPaymentStatus').prop('disabled', false);
             }
         }
 
@@ -371,13 +388,13 @@
         }
 
         $(document).ready(function() {
-            // Lấy giá trị ban đầu
-            const currentStatus = '@Model.Order.Status';
+            // Lấy giá trị ban đầu từ Model (giả sử đúng định dạng)
+            const currentStatus = '@Model.Order.Status'.toString();
             const paymentMethod = '@Model.Order.PaymentMethod';
             const currentPaymentStatus = '@Model.Order.PaymentStatus' === 'Chưa thanh toán' ? 'Chưa thanh toán' : 'Đã thanh toán';
 
             // Khởi tạo dropdown trạng thái đơn hàng
-            updateStatusDropdown(currentStatus);
+            updateStatusDropdown(currentStatus, currentPaymentStatus);
 
             // Khởi tạo dropdown trạng thái thanh toán
             updatePaymentStatus(paymentMethod, currentStatus, currentPaymentStatus);
@@ -385,13 +402,19 @@
             // Xử lý sự kiện khi thay đổi trạng thái đơn hàng
             $('#orderStatus').change(function() {
                 const newStatus = $(this).val();
+                let newPaymentStatus = currentPaymentStatus;
+
                 // Nếu chuyển sang trạng thái "Đã giao hàng" và phương thức thanh toán là tiền mặt
-                if (newStatus === '3' && paymentMethod === 'Cash') {
-                    $('#orderPaymentStatus').val('Đã thanh toán');
+                if (newStatus === '3' && paymentMethod === 'Tiền mặt') {
+                    newPaymentStatus = 'Đã thanh toán';
                 }
+                // Cập nhật lại dropdown trạng thái thanh toán
+                updatePaymentStatus(paymentMethod, newStatus, newPaymentStatus);
+                // Cập nhật dropdown trạng thái đơn hàng (nếu cần loại "Đã hủy")
+                updateStatusDropdown(newStatus, newPaymentStatus);
             });
 
-            // Thêm CSS để tùy chỉnh timeline
+            // Thêm CSS cho timeline (không thay đổi)
             $("<style>")
                 .prop("type", "text/css")
                 .html(`

@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authorization;
+ï»¿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -21,20 +21,20 @@ namespace WebDelishOrder.Controllers
         // GET: /Home/Index
         public IActionResult Index()
         {
-            // Thi?t l?p ViewData ?? ?ánh d?u menu
+            // Thi?t l?p ViewData ?? ?Ã¡nh d?u menu
             ViewData["ActivePage"] = "Dashboard";
-            ViewData["PageTitle"] = "Dashboard";
+            ViewData["PageTitle"] = "Tá»•ng quan";
 
-            // Tính toán các ch? s? th?ng kê
+            // TÃ­nh toÃ¡n cÃ¡c ch? s? th?ng kÃª
             CalculateKPIs();
 
-            // L?y d? li?u cho các bi?u ??
+            // L?y d? li?u cho cÃ¡c bi?u ??
             PrepareChartData();
 
-            // L?y ??n hàng g?n ?ây
+            // L?y ??n hÃ ng g?n ?Ã¢y
             GetRecentOrders();
 
-            // L?y món ?n ph? bi?n
+            // L?y mÃ³n ?n ph? bi?n
             GetPopularItems();
 
             return View();
@@ -51,7 +51,7 @@ namespace WebDelishOrder.Controllers
             switch (period)
             {
                 case "day":
-                    // Doanh thu 30 ngày g?n nh?t
+                    // Doanh thu 30 ngÃ y g?n nh?t
                     for (int i = 29; i >= 0; i--)
                     {
                         var date = today.AddDays(-i);
@@ -86,7 +86,7 @@ namespace WebDelishOrder.Controllers
                     break;
 
                 case "month":
-                    // Doanh thu 12 tháng g?n nh?t
+                    // Doanh thu 12 thÃ¡ng g?n nh?t
                     for (int i = 11; i >= 0; i--)
                     {
                         var date = today.AddMonths(-i);
@@ -110,7 +110,7 @@ namespace WebDelishOrder.Controllers
             return Json(new { labels, values });
         }
 
-        // Ph??ng th?c tính toán các KPI
+        // Ph??ng th?c tÃ­nh toÃ¡n cÃ¡c KPI
         private void CalculateKPIs()
         {
             var today = DateTime.Today;
@@ -118,14 +118,14 @@ namespace WebDelishOrder.Controllers
             var lastDayOfLastMonth = firstDayOfMonth.AddDays(-1);
             var firstDayOfLastMonth = new DateTime(lastDayOfLastMonth.Year, lastDayOfLastMonth.Month, 1);
 
-            // Tính t?ng doanh thu tháng này
+            // TÃ­nh t?ng doanh thu thÃ¡ng nÃ y
             var revenueThisMonth = _context.Orders
                 .Where(o => o.RegTime.HasValue &&
                        o.RegTime.Value.Date >= firstDayOfMonth &&
                        o.Status != 4)
                 .Sum(o => o.TotalPrice) ?? 0;
 
-            // Tính t?ng doanh thu tháng tr??c
+            // TÃ­nh t?ng doanh thu thÃ¡ng tr??c
             var revenueLastMonth = _context.Orders
                 .Where(o => o.RegTime.HasValue &&
                        o.RegTime.Value.Date >= firstDayOfLastMonth &&
@@ -133,7 +133,7 @@ namespace WebDelishOrder.Controllers
                        o.Status != 4)
                 .Sum(o => o.TotalPrice) ?? 0;
 
-            // Tính % t?ng tr??ng doanh thu
+            // TÃ­nh % t?ng tr??ng doanh thu
             double revenueIncrease = 0;
             if (revenueLastMonth > 0)
             {
@@ -144,17 +144,17 @@ namespace WebDelishOrder.Controllers
                 revenueIncrease = 100;
             }
 
-            // ??m t?ng s? ??n hàng tháng này
+            // ??m t?ng s? ??n hÃ ng thÃ¡ng nÃ y
             var ordersThisMonth = _context.Orders
                 .Count(o => o.RegTime.HasValue && o.RegTime.Value.Date >= firstDayOfMonth);
 
-            // ??m t?ng s? ??n hàng tháng tr??c
+            // ??m t?ng s? ??n hÃ ng thÃ¡ng tr??c
             var ordersLastMonth = _context.Orders
                 .Count(o => o.RegTime.HasValue &&
                        o.RegTime.Value.Date >= firstDayOfLastMonth &&
                        o.RegTime.Value.Date < firstDayOfMonth);
 
-            // Tính % t?ng tr??ng s? ??n hàng
+            // TÃ­nh % t?ng tr??ng s? ??n hÃ ng
             double ordersIncrease = 0;
             if (ordersLastMonth > 0)
             {
@@ -165,14 +165,14 @@ namespace WebDelishOrder.Controllers
                 ordersIncrease = 100;
             }
 
-            // ??m s? khách hàng ho?t ??ng tháng này (khách hàng có ??t ??n hàng)
+            // ??m s? khÃ¡ch hÃ ng ho?t ??ng thÃ¡ng nÃ y (khÃ¡ch hÃ ng cÃ³ ??t ??n hÃ ng)
             var activeCustomersThisMonth = _context.Orders
                 .Where(o => o.RegTime.HasValue && o.RegTime.Value.Date >= firstDayOfMonth)
                 .Select(o => o.AccountEmail)
                 .Distinct()
                 .Count();
 
-            // ??m s? khách hàng ho?t ??ng tháng tr??c
+            // ??m s? khÃ¡ch hÃ ng ho?t ??ng thÃ¡ng tr??c
             var activeCustomersLastMonth = _context.Orders
                 .Where(o => o.RegTime.HasValue &&
                        o.RegTime.Value.Date >= firstDayOfLastMonth &&
@@ -181,7 +181,7 @@ namespace WebDelishOrder.Controllers
                 .Distinct()
                 .Count();
 
-            // Tính % t?ng tr??ng khách hàng ho?t ??ng
+            // TÃ­nh % t?ng tr??ng khÃ¡ch hÃ ng ho?t ??ng
             double customersIncrease = 0;
             if (activeCustomersLastMonth > 0)
             {
@@ -192,25 +192,25 @@ namespace WebDelishOrder.Controllers
                 customersIncrease = 100;
             }
 
-            // ??m ??n hàng ch? x? lý
+            // ??m ??n hÃ ng ch? x? lÃ½
             var pendingOrders = _context.Orders.Count(o => o.Status == 0);
 
-            // ??a k?t qu? vào ViewBag
+            // ??a k?t qu? vÃ o ViewBag
             ViewBag.TotalRevenue = revenueThisMonth;
             ViewBag.RevenueIncrease = revenueIncrease;
             ViewBag.TotalOrders = ordersThisMonth;
             ViewBag.OrdersIncrease = ordersIncrease;
-            ViewBag.NewCustomers = activeCustomersThisMonth; // ??i t? NewCustomers thành s? khách hàng ho?t ??ng
+            ViewBag.NewCustomers = activeCustomersThisMonth; // ??i t? NewCustomers thÃ nh s? khÃ¡ch hÃ ng ho?t ??ng
             ViewBag.CustomersIncrease = customersIncrease;
             ViewBag.PendingOrders = pendingOrders;
         }
 
-        // Ph??ng th?c chu?n b? d? li?u cho các bi?u ??
+        // Ph??ng th?c chu?n b? d? li?u cho cÃ¡c bi?u ??
         private void PrepareChartData()
         {
             var today = DateTime.Today;
 
-            // D? li?u bi?u ?? doanh thu (30 ngày g?n nh?t)
+            // D? li?u bi?u ?? doanh thu (30 ngÃ y g?n nh?t)
             var labels = Enumerable.Range(0, 30)
                 .Select(i => today.AddDays(-i))
                 .Reverse()
@@ -230,19 +230,19 @@ namespace WebDelishOrder.Controllers
 
             ViewBag.RevenueData = new { labels, values };
 
-            // D? li?u bi?u ?? tr?ng thái ??n hàng
-            var statusLabels = new[] { "Ch? xác nh?n", "?ang chu?n b?", "?ang giao hàng", "?ã giao hàng", "?ã h?y" };
+            // D? li?u bi?u ?? tr?ng thÃ¡i ??n hÃ ng
+            var statusLabels = new[] { "Ch? xÃ¡c nh?n", "?ang chu?n b?", "?ang giao hÃ ng", "?Ã£ giao hÃ ng", "?Ã£ h?y" };
             var statusValues = Enumerable.Range(0, 5)
                 .Select(status => _context.Orders.Count(o => o.Status == status))
                 .ToArray();
 
             ViewBag.OrderStatusData = new { labels = statusLabels, values = statusValues };
 
-            // D? li?u bi?u ?? khung gi? ??t hàng
+            // D? li?u bi?u ?? khung gi? ??t hÃ ng
             var timeLabels = new[] { "0-4h", "4-8h", "8-12h", "12-16h", "16-20h", "20-24h" };
             var timeValues = new int[6];
 
-            // Nhóm ??n hàng theo khung gi?
+            // NhÃ³m ??n hÃ ng theo khung gi?
             var orders = _context.Orders
                 .Where(o => o.RegTime.HasValue && o.RegTime.Value.Date >= today.AddDays(-30))
                 .ToList();
@@ -284,7 +284,7 @@ namespace WebDelishOrder.Controllers
             ViewBag.CategoryRevenueData = new { labels = categoryLabels, values = categoryValues };
         }
 
-        // Ph??ng th?c l?y ??n hàng g?n ?ây
+        // Ph??ng th?c l?y ??n hÃ ng g?n ?Ã¢y
         private void GetRecentOrders()
         {
             var recentOrders = _context.Orders
@@ -303,7 +303,7 @@ namespace WebDelishOrder.Controllers
                       })
                 .ToList();
 
-            // Trong tr??ng h?p không có kh?p, c?n ki?m tra
+            // Trong tr??ng h?p khÃ´ng cÃ³ kh?p, c?n ki?m tra
             if (recentOrders.Count < 5)
             {
                 var missingOrders = _context.Orders
@@ -313,7 +313,7 @@ namespace WebDelishOrder.Controllers
                     .Select(o => new
                     {
                         Id = o.Id,
-                        CustomerName = o.AccountEmail, // Không tìm th?y Customer
+                        CustomerName = o.AccountEmail, // KhÃ´ng tÃ¬m th?y Customer
                         OrderDate = o.RegTime ?? DateTime.Now,
                         TotalAmount = o.TotalPrice ?? 0,
                         Status = o.Status ?? 0
@@ -326,7 +326,7 @@ namespace WebDelishOrder.Controllers
             ViewBag.RecentOrders = recentOrders;
         }
 
-        // Ph??ng th?c l?y món ?n ph? bi?n
+        // Ph??ng th?c l?y mÃ³n ?n ph? bi?n
         private void GetPopularItems()
         {
             var popularItems = _context.OrderDetails
@@ -346,7 +346,7 @@ namespace WebDelishOrder.Controllers
                           Id = p.Id,
                           Name = p.Name,
                           Price = p.Price,
-                          ImageUrl = p.ImageProduct, // S? d?ng tên tr??ng ImageProduct
+                          ImageUrl = p.ImageProduct, // S? d?ng tÃªn tr??ng ImageProduct
                           OrderCount = oi.OrderCount
                       })
                 .ToList();

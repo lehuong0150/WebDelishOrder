@@ -126,9 +126,7 @@
 									<li class="text-center" id="emptyNotification">
 										<p>Không có thông báo nào</p>
 									</li>
-									<li class="text-center">
-										<a href="#!" id="markAllAsRead">Đánh dấu tất cả đã đọc</a>
-									</li>
+									
 								</ul>
 							</li>
 							<li>
@@ -141,17 +139,6 @@
 									<i class="ti-angle-down"></i>
 								</a>
 								<ul class="show-notification profile-notification">
-									<li>
-										<a href="#!">
-											<i class="ti-settings"></i> Cài đặt
-										</a>
-									</li>
-									<li>
-										<a href="#">
-											<i class="ti-user"></i> Hồ sơ
-										</a>
-									</li>
-
 									<li>
 										<a asp-controller="Account" asp-action="Logout">
 											<i class="ti-layout-sidebar-left"></i> Đăng xuất
@@ -172,10 +159,10 @@
 							<div class="pcoded-navigatio-lavel" data-i18n="nav.category.navigation">Tổng quan</div>
 							<ul class="pcoded-item pcoded-left-item">
 								<li class="@(ViewData["ActivePage"] as string == "Dashboard" ? "active" : "")">
-									<a asp-controller="Home" asp-action="Index">
+									<a asp-controller="Home" asp-action="Index" >
 										<!-- Sửa từ asp-page thành asp-controller và asp-action -->
 										<span class="pcoded-micon"><i class="bi bi-speedometer2"></i></span>
-										<span class="pcoded-mtext">Dashboard</span>
+										<span class="pcoded-mtext">Tổng quan</span>
 									</a>
 								</li>
 							</ul>
@@ -184,7 +171,7 @@
 							<div class="pcoded-navigatio-lavel" data-i18n="nav.category.forms">Quản lý danh mục</div>
 							<ul class="pcoded-item pcoded-left-item">
 								<li class="@(ViewData["ActivePage"] as string == "Category" ? "active" : "")">
-									<a asp-controller="Category" asp-action="Index">
+									<a asp-controller="Category" asp-action="Index" >
 										<!-- Sửa từ asp-page thành asp-controller và asp-action -->
 										<span class="pcoded-micon"><i class="bi bi-grid"></i></span>
 										<span class="pcoded-mtext">Danh mục món ăn</span>
@@ -196,10 +183,10 @@
 							<div class="pcoded-navigatio-lavel" data-i18n="nav.category.forms">Sản phẩm</div>
 							<ul class="pcoded-item pcoded-left-item">
 								<li class="@(ViewData["ActivePage"] as string == "Product" ? "active" : "")">
-									<a asp-controller="Product" asp-action="Index">
+									<a asp-controller="Product" asp-action="Index" >
 										<!-- Sửa từ asp-page thành asp-controller và asp-action -->
 										<span class="pcoded-micon"><i class="bi bi-box"></i></span>
-										<span class="pcoded-mtext">Menu</span>
+										<span class="pcoded-mtext">Danh sách món ăn</span>
 									</a>
 								</li>
 							</ul>
@@ -208,10 +195,22 @@
 							<div class="pcoded-navigatio-lavel" data-i18n="nav.category.other">Quản lý đơn hàng</div>
 							<ul class="pcoded-item pcoded-left-item">
 								<li class="@(ViewData["ActivePage"] as string == "UpdateStatus" ? "active" : "")">
-									<a asp-controller="Order" asp-action="Index">
+									<a asp-controller="Order" asp-action="Index" >
 										<!-- Sửa từ asp-page thành asp-controller và asp-action -->
 										<span class="pcoded-micon"><i class="bi bi-truck"></i></span>
 										<span class="pcoded-mtext">Cập nhật đơn hàng</span>
+									</a>
+								</li>
+							</ul>
+
+							<!--Đánh giá-->
+							<div class="pcoded-navigatio-lavel" data-i18n="nav.category.other">Đánh giá</div>
+							<ul class="pcoded-item pcoded-left-item">
+								<li class="@(ViewData["ActivePage"] as string == "ReviewFood" ? "active" : "")">
+									<a asp-controller="Review" asp-action="Index" >
+										<!-- Sửa từ asp-page thành asp-controller và asp-action -->
+										<span class="pcoded-micon"><i class="bi bi-bar-chart"></i></span>
+										<span class="pcoded-mtext">Đánh giá món ăn</span>
 									</a>
 								</li>
 							</ul>
@@ -227,6 +226,8 @@
 									</a>
 								</li>
 							</ul>
+
+							
 						</div>
 
 
@@ -409,6 +410,7 @@
 		const notificationSound = new Audio("../assets/sounds/notification_sound.mp3");
 		notificationSound.load();
 	</script>
+	
 	<style>
 		.toast-notification {
 			position: fixed;

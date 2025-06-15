@@ -39,6 +39,13 @@ namespace WebDelishOrder.Controllers
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToList();
+            foreach (var p in products)
+            {
+                if (p.Quantity == 0)
+                {
+                    p.IsAvailable = false;
+                }
+            }
 
             var totalItems = query.Count();
             var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);

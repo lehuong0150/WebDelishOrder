@@ -20,7 +20,14 @@ public class ProductMenuViewComponent : ViewComponent
             .Skip((pageIndex - 1) * pageSize)
             .Take(pageSize)
             .ToList();
-
+        foreach (var p in products)
+        {
+            if (p.Quantity == 0)
+            {
+                p.IsAvailable = false;
+            }
+        }
+        _context.SaveChanges();
         return View(products);
     }
 }

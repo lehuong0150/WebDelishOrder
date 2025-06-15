@@ -112,6 +112,35 @@ namespace WebDelishOrder.APIControllers
             await _context.SaveChangesAsync();
             return NoContent();
         }
+        [HttpPost("create")]
+        public async Task<IActionResult> CreateCustomer([FromBody] Customer customer)
+        {
+            if (customer == null || string.IsNullOrEmpty(customer.AccountEmail))
+            {
+                return BadRequest(new { message = "Dữ liệu khách hàng không hợp lệ hoặc thiếu email." });
+            }
+
+            // Kiểm tra email đã tồn tại chưa
+            var existingCustomer = await _context.Customers
+                .FirstOrDefaultAsync(c => c.AccountEmail == customer.AccountEmail);
+
+            if (existingCustomer != null)
+            {
+                return Conflict(new { message = "Email đã tồn tại trong hệ thống." });
+            }
+
+            // Gán avatar mặc định nếu chưa có
+            if (string.IsNullOrEmpty(customer.Avatar))
+            {
+                customer.Avatar = "default-avatar-url.jpg";
+            }
+
+            _context.Customers.Add(customer);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction(nameof(GetCustomer), new { id = customer.Id }, customer);
+        }
+
     }
 
 }

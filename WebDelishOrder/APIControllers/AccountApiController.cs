@@ -128,7 +128,7 @@ public class AccountApiController : ControllerBase
     {
         return _context.Accounts.Any(e => e.Email == email);
     }
-
+    //Cập nhật token Firebase
     [HttpPost("updateFirebaseToken")]
     public IActionResult UpdateFirebaseToken([FromBody] UpdateTokenRequest request)
     {
@@ -142,5 +142,28 @@ public class AccountApiController : ControllerBase
         _context.SaveChanges();
 
         return Ok("Firebase token updated successfully.");
+    }
+    // doi mat khau 
+    [HttpPost("changePassword")]
+    public async Task<IActionResult> ChangePassword([FromBody] Dictionary<string, string> data)
+    {
+        if (!data.ContainsKey("email") || !data.ContainsKey("oldPassword") || !data.ContainsKey("newPassword"))
+            return BadRequest(new { error = "Thiếu thông tin." });
+
+        var email = data["email"];
+        var oldPassword = data["oldPassword"];
+        var newPassword = data["newPassword"];
+
+        var account = await _context.Accounts.FirstOrDefaultAsync(a => a.Email == email);
+        if (account == null)
+            return NotFound(new { error = "Email không tồn tại." });
+
+        if (account.Password != oldPassword)
+            return BadRequest(new { error = "Mật khẩu cũ không đúng." });
+
+        account.Password = newPassword;
+        await _context.SaveChangesAsync();
+
+        return Ok(new { message = "Đổi mật khẩu thành công." });
     }
 }

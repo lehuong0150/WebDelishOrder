@@ -187,6 +187,20 @@ namespace WebDelishOrder.Controllers
             order.PaymentMethod = updatedOrder.PaymentMethod;
             order.PaymentStatus = updatedOrder.PaymentStatus;
 
+
+            // Nếu chuyển sang trạng thái "Đã hủy" và trước đó không phải "Đã hủy"
+            if (updatedOrder.Status == 4 && order.Status != 4)
+            {
+                foreach (var detail in order.OrderDetails)
+                {
+                    var product = _context.Products.FirstOrDefault(p => p.Id == detail.ProductId);
+                    if (product != null)
+                    {
+                        product.Quantity += detail.Quantity;
+                    }
+                }
+            }
+
             // Save changes to the database
             _context.SaveChanges();
 
@@ -269,9 +283,11 @@ namespace WebDelishOrder.Controllers
         }
         public IActionResult PrintInvoice(int id)
         {
+            ViewData["ActivePage"] = "UpdateStatus";
+            ViewData["PageTitle"] = "Hóa đơn";
             var order = _context.Orders
                 .Include(o => o.OrderDetails)
-                .ThenInclude(od => od.Product) // Include the Product entity
+                .ThenInclude(od => od.Product) 
                 .FirstOrDefault(o => o.Id == id);
 
             if (order == null)

@@ -113,6 +113,7 @@
 @section Scripts {
 	<script>
 
+				// Đặt ngoài $(document).ready
 		function loadProducts(pageIndex) {
 			var searchTerm = $('#searchTerm').val();
 			$.ajax({
@@ -135,21 +136,22 @@
 					var paginationHtml = '<ul class="pagination">';
 					for (var i = 1; i <= data.totalPages; i++) {
 						if (i === pageIndex) {
-						paginationHtml += '<li class="page-item active">' +
-							'<a href="#" class="page-link" onclick="loadProducts(' + i + '); return false;">' + i + '</a>' +
-							'</li>';
-					} else {
-						paginationHtml += '<li class="page-item">' +
-							'<a href="#" class="page-link" onclick="loadProducts(' + i + '); return false;">' + i + '</a>' +
-							'</li>';
-					}
+							paginationHtml += '<li class="page-item active">' +
+								'<a href="#" class="page-link" onclick="loadProducts(' + i + '); return false;">' + i + '</a>' +
+								'</li>';
+						} else {
+							paginationHtml += '<li class="page-item">' +
+								'<a href="#" class="page-link" onclick="loadProducts(' + i + '); return false;">' + i + '</a>' +
+								'</li>';
+						}
 					}
 					paginationHtml += '</ul>';
 					$('#pagination').html(paginationHtml);
 				}
 			});
 		}
-			$(document).ready(function () {
+
+		$(document).ready(function () {
 			// Khi bấm nút search
 			$('#btnSearch').click(function () {
 				loadProducts(1);
@@ -165,7 +167,6 @@
 
 			// Lúc mới vào trang thì tự động load page 1
 			loadProducts(1);
-
-		
+		});
 	</script>
 }

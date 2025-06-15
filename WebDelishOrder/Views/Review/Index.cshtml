@@ -1,0 +1,63 @@
+﻿@model IEnumerable<WebDelishOrder.ViewModels.CommentViewModel>
+@{
+    ViewBag.Title = "Đánh giá món ăn";
+    var currentEmail = Context.Request.Query["searchEmail"].ToString();
+    var currentRating = Context.Request.Query["rating"].ToString();
+}
+
+<h2 class="mb-3">Đánh giá món ăn</h2>
+
+<form method="get" class="form-inline mb-3">
+    <div class="form-group mr-2">
+        <label for="searchEmail" class="mr-2">Email:</label>
+        <input type="text" name="searchEmail" id="searchEmail" placeholder="Tìm theo email"
+               value="@currentEmail"
+               class="form-control" />
+    </div>
+
+    <div class="form-group mr-2">
+        <label for="rating" class="mr-2">Đánh giá:</label>
+        <select name="rating" id="rating" class="form-control">
+            <option value="">Tất cả đánh giá</option>
+            @for (int i = 1; i <= 5; i++)
+            {
+                <option value="@i" selected="@(currentRating == i.ToString() ? "selected" : null)">@i sao</option>
+            }
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Lọc</button>
+</form>
+
+<table class="table table-bordered table-striped">
+    <thead class="thead-dark">
+        <tr>
+            <th>Email người dùng</th>
+            <th>Món ăn</th>
+            <th>Đánh giá</th>
+            <th>Nội dung</th>
+            <th>Thời gian</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (!Model.Any())
+        {
+            <tr>
+                <td colspan="5" class="text-center text-muted">Không có đánh giá nào phù hợp.</td>
+            </tr>
+        }
+        else
+        {
+            @foreach (var item in Model)
+            {
+                <tr class="@(item.Evaluate <= 2 ? "table-danger" : "")">
+                    <td>@item.AccountEmail</td>
+                    <td>@item.ProductName</td>
+                    <td>@item.Evaluate</td>
+                    <td>@item.Descript</td>
+                    <td>@item.RegTime.ToString("dd/MM/yyyy HH:mm")</td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>

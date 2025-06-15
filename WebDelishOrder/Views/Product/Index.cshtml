@@ -14,7 +14,7 @@
                     <div class="col-sm-4">
                         <div class="card">
                             <div class="card-header">
-                                <h4>Menu</h4>
+                                <h4>Sản phẩm</h4>
                             </div>
                             <div class="card-block">
                                 @using (Html.BeginForm(Model.NewProduct.Id != 0 ? "Edit" : "Create", "Product", FormMethod.Post, new { enctype = "multipart/form-data" }))
@@ -64,7 +64,7 @@
 
 
                                     <div class="form-group">
-                                        <label>Danh mục: </label>
+                                        <label>Sản phẩm: </label>
                                         @Html.DropDownListFor(
                                                  m => m.NewProduct.CategoryId,
                                                  new SelectList(ViewBag.CategoryList, "Id", "Name"),

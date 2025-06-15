@@ -57,7 +57,7 @@ builder.Services.AddCors(options =>
 
 builder.WebHost.ConfigureKestrel(serverOptions =>
 {
-    serverOptions.Listen(System.Net.IPAddress.Parse("192.168.1.70"), 7010); // HTTP
+    serverOptions.Listen(System.Net.IPAddress.Parse("192.168.2.120"), 7010); // HTTP
 });
 
 builder.Services.AddControllers().AddJsonOptions(x =>
